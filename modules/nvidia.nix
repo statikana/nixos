@@ -1,3 +1,5 @@
+# thanks evan :)
+
 {
   pkgs,
   config,
@@ -21,6 +23,7 @@ in
 {
   # Enable OpenGL
   hardware.graphics.enable = true;
+
 
   environment.systemPackages = [ nvidia-offload ];
 

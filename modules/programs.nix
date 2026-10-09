@@ -1,9 +1,16 @@
 { ... }: {
-    programs.nix-ld.enable = true;
-    
-    programs.firefox.enable = true;
-    programs.steam.enable = true;
+    programs = {
+        nix-ld.enable = true;
 
-    # hyprland is managed in ./hyprland.nix
-    # programs.hyprland.enabled = true;
+        programs.firefox.enable = true;
+
+        programs.steam.enable = true;
+
+        mtr.enable = true;
+        
+        gnupg.agent = {
+            enable = true;
+            enableSSHSupport = true;
+        }
+    };
 }

@@ -1,12 +1,15 @@
-{ ... }:
-
+{ lib, ... }:
 {
-  imports = [
-    ./packages.nix
-    ./hardware-configuration.nix
-    ./aliases.nix
-    ./nvidia.nix
-    ./hyprland.nix
-    ./audio.nix
-];
+    imports = lib.pipe ./. [
+		builtins.readDir(
+			lib.filterAttrs (
+				name: 
+				type: name != "default.nix" && (type == "directory" || lib.hasSuffix ".nix" name)
+			)
+		)(
+			lib.mapAttrsToList (
+				name: _: ./. + "/${name}"
+			)
+		)
+    ];
 }
