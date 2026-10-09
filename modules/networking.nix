@@ -7,7 +7,7 @@
     # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
 
     networking.networkmanager.enable = true;
-
+    # networking.nameservers = ["127.0.0.1"];
     # for dockerd I think
     networking.firewall.allowedTCPPorts = [ 2375 ];
     # networking.firewall.allowedUDPPorts = [ ... ];

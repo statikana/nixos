@@ -70,7 +70,7 @@ in
         # CLI Utils
         ffmpeg
         cloudflared
-        cloudflare-warp
+        dnscrypt-proxy
         qbittorrent
         tree
         gparted
@@ -96,7 +96,7 @@ in
         jq # json
 
         ripgrep
-        cryptsetup
+        tor
 
         # Desktop apps
         qgroundcontrol
