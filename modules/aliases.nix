@@ -22,5 +22,8 @@
         docs = "cd ~/documents";
         me = "cd ~/documents/github/statikana";
         mast = "cd ~/documents/github/mast";
+
+        # Services
+        cfm = "systemctl status cloudflared-tunnel-8054cb48-cd44-4232-8cb1-fd0c7540c73a";
     };
 }

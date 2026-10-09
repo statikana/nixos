@@ -7,7 +7,7 @@
 
 {
     imports = [
-        "./modules"
+        "/home/ryan/nixos/modules"
     ];
 
     # Enable the X11 windowing system.

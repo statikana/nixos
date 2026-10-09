@@ -70,6 +70,7 @@ in
         # CLI Utils
         ffmpeg
         cloudflared
+        cloudflare-warp
         qbittorrent
         tree
         gparted

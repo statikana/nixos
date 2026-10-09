@@ -7,7 +7,7 @@
             name: type: name != "default.nix" && (type == "directory" || lib.hasSuffix ".nix" name) # read all directories and .nix files here
         ))
         (lib.mapAttrsToList (
-            name: _: ./. + "/${name}" # relative pathing
+            name: _: ./. + (builtins.trace "load: ${name}" "/${name}") # relative pathing
         ))
     ];
 }
