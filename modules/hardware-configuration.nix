@@ -2,48 +2,48 @@
 # and may be overwritten by future invocations.  Please make changes
 # to /etc/nixos/configuration.nix instead.
 {
-  config,
-  lib,
-  pkgs,
-  modulesPath,
-  ...
+    config,
+    lib,
+    pkgs,
+    modulesPath,
+    ...
 }:
 
 {
-  imports = [
-    (modulesPath + "/installer/scan/not-detected.nix")
-  ];
-
-  boot.initrd.availableKernelModules = [
-    "xhci_pci"
-    "nvme"
-    "thunderbolt"
-    "usb_storage"
-    "sd_mod"
-    "rtsx_pci_sdmmc"
-  ];
-  boot.initrd.kernelModules = [ ];
-  boot.kernelModules = [ "kvm-intel" ];
-  boot.extraModulePackages = [ ];
-
-  fileSystems."/" = {
-    device = "/dev/disk/by-uuid/69d4d685-2e21-4c04-a828-d757070798dc";
-    fsType = "ext4";
-  };
-
-  fileSystems."/boot" = {
-    device = "/dev/disk/by-uuid/1125-6628";
-    fsType = "vfat";
-    options = [
-      "fmask=0077"
-      "dmask=0077"
+    imports = [
+        (modulesPath + "/installer/scan/not-detected.nix")
     ];
-  };
 
-  swapDevices = [
-    { device = "/dev/disk/by-uuid/dfde130d-a4d3-4362-82da-d4def36def8e"; }
-  ];
+    boot.initrd.availableKernelModules = [
+        "xhci_pci"
+        "nvme"
+        "thunderbolt"
+        "usb_storage"
+        "sd_mod"
+        "rtsx_pci_sdmmc"
+    ];
+    boot.initrd.kernelModules = [ ];
+    boot.kernelModules = [ "kvm-intel" ];
+    boot.extraModulePackages = [ ];
 
-  nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
-  hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
+    fileSystems."/" = {
+        device = "/dev/disk/by-uuid/69d4d685-2e21-4c04-a828-d757070798dc";
+        fsType = "ext4";
+    };
+
+    fileSystems."/boot" = {
+        device = "/dev/disk/by-uuid/1125-6628";
+        fsType = "vfat";
+        options = [
+            "fmask=0077"
+            "dmask=0077"
+        ];
+    };
+
+    swapDevices = [
+        { device = "/dev/disk/by-uuid/dfde130d-a4d3-4362-82da-d4def36def8e"; }
+    ];
+
+    nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
+    hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
 }

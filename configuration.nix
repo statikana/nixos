@@ -6,42 +6,30 @@
 }:
 
 {
-	imports = [
-		"/etc/nixos/modules"
-	];
+    imports = [
+        "./modules"
+    ];
 
-	# Use the systemd-boot EFI boot loader.
+    # Enable the X11 windowing system.
+    # You can disable this if you're only using the Wayland session.
+    services.xserver.enable = true;
 
+    services.displayManager.sddm.enable = true;
+    services.desktopManager.plasma6.enable = true;
 
-	# Set your time zone.
+    # Configure keymap in X11
+    services.xserver.xkb = {
+        layout = "us";
+        variant = "";
+    };
 
-	# Enable the X11 windowing system.
-	# You can disable this if you're only using the Wayland session.
-	services.xserver.enable = true;
+    nixpkgs.config.allowUnfree = true;
 
-	# Enable the KDE Plasma Desktop Environment.
-	services.displayManager.sddm.enable = true;
-	services.desktopManager.plasma6.enable = true;
+    nix.settings.experimental-features = [
+        "nix-command"
+        "flakes"
+    ];
 
-	# Configure keymap in X11
-	services.xserver.xkb = {
-		layout = "us";
-		variant = "";
-	};
-
-
-	nixpkgs.config.allowUnfree = true;
-
-	nix.settings.experimental-features = [
-		"nix-command"
-		"flakes"
-	];
-
-	environment.systemPackages = with pkgs; [
-
-	];
-
-
-	# Smallest supported version of NixOS
-	system.stateVersion = "26.05";
+    # Smallest supported version of NixOS
+    system.stateVersion = "26.05";
 }

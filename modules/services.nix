@@ -1,7 +1,7 @@
 { ... }: {
     services.flatpak.enable = true;
 
-    services.printing.enable = true;  # CUPS
+    services.printing.enable = true; # CUPS
 
     services.libinput.enable = true; # touchpad
 

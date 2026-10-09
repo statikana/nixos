@@ -11,5 +11,5 @@
         #jack.enable = true;
 
         #wireplumber.enable = true;
-  };
+    };
 }
