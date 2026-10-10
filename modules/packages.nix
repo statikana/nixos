@@ -69,6 +69,7 @@ in
 
         # CLI Utils
         ffmpeg
+        dig
         cloudflared
         dnscrypt-proxy
         qbittorrent

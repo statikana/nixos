@@ -10,11 +10,13 @@
     services.fprintd.enable = true; # fingerprint
 
     services.dnscrypt-proxy = {
-        enable = true;
+        enable = false;
         settings = {
             server_names = ["cloudflare"];
             proxy = "socks5://127.0.0.1:9050";
             force_tcp = true;
         };
     };
+
+    services.tor.enable = false;
 }
