@@ -78,7 +78,7 @@ in
         nvidiaPersistenced = true;
         modesetting.enable = true;
         # Optionally, you may need to select the appropriate driver version for your specific GPU.
-        #package = config.boot.kernelPackages.nvidiaPackages.stable; # old stable package
+        # package = config.boot.kernelPackages.nvidiaPackages.stable; # old stable package
         package = config.boot.kernelPackages.nvidiaPackages.mkDriver {
             version = "610.57.04";
             sha256_64bit = "sha256-suk1xmuDuwDAyFe8jg7g/VLekoa0DJzB7sKafOfrEW0=";
@@ -88,9 +88,12 @@ in
         };
 
         prime = {
+            # lspci -k | grep "Class 0300"
+            # the formatting is picky
+
             offload.enable = true;
-            amdgpuBusId = "PCI:4:0:0";
-            nvidiaBusId = "PCI:1:0:0";
+            intelBusId = "PCI:0:0:2";
+            nvidiaBusId = "PCI:0:1:0";
         };
 
     };

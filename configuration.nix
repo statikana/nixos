@@ -4,24 +4,16 @@
     lib,
     ...
 }:
-
+let
+    home-manager = builtins.fetchTarball "https://github.com/nix-community/home-manager/archive/master.tar.gz";
+in
 {
     imports = [
         "/home/ryan/nixos/modules"
+        "${home-manager}/nixos"
     ];
 
-    # Enable the X11 windowing system.
-    # You can disable this if you're only using the Wayland session.
-    services.xserver.enable = true;
-
-    services.displayManager.sddm.enable = true;
-    services.desktopManager.plasma6.enable = true;
-
-    # Configure keymap in X11
-    services.xserver.xkb = {
-        layout = "us";
-        variant = "";
-    };
+    home-manager.users."ryan" = import "/home/ryan/nixos/home-config/ryan";
 
     nixpkgs.config.allowUnfree = true;
 
@@ -30,6 +22,8 @@
         "flakes"
     ];
 
-    # Smallest supported version of NixOS
+    environment.sessionVariables.NIXOS_OZONE_WL = "1";
+
+    # Smallest supported version of NixOS, don't change
     system.stateVersion = "26.05";
 }

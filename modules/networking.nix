@@ -11,7 +11,7 @@
 
     # for dockerd I think
     networking.firewall.allowedTCPPorts = [ 2375 ];
-    
+
     # networking.firewall.allowedUDPPorts = [ ... ];
     # networking.firewall.enable = false;
 }

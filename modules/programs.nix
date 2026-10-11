@@ -1,5 +1,15 @@
 { ... }: {
     programs = {
+        # https://search.nixos.org/options?channel=26.05&query=programs.uwsm&type=options#show=option%253Aprograms.uwsm.waylandCompositors
+        # uwsm = {
+        #     enable = true;
+        #     waylandCompositors.hyprland = {
+        #         prettyName = "Hyprland w/ UWSM";
+        #         comment = "Hyprland compositor managed by global UWSM program";
+        #         binPath = "/run/current-system/bw/bin/Hyprland";
+        #     };
+        # }; # dont do this! handled already
+
         nix-ld.enable = true;
 
         firefox.enable = true;
@@ -12,5 +22,12 @@
             enable = true;
             enableSSHSupport = true;
         };
+
+        hyprland = {
+            enable = true;
+            withUWSM = true;
+            xwayland.enable = true;
+        };
+
     };
 }

@@ -1,0 +1,175 @@
+// config.jsonc, hardlined to ~/.config/waybar
+{
+    "layer": "top",
+    "position": "top",
+    "height": 38,
+    "spacing": 6,
+    "margin-top": 8,
+    "margin-left": 10,
+    "margin-right": 10,
+    "reload_style_on_change": true,
+
+    "modules-left": [
+        "hyprland/workspaces",
+        "hyprland/window"
+    ],
+    "modules-center": [
+        "clock"
+    ],
+    "modules-right": [
+        "cpu",
+        "memory",
+        "temperature",
+        "pulseaudio",
+        "pulseaudio#microphone",
+        "network",
+        "bluetooth",
+        "battery",
+        "tray"
+    ],
+
+    "hyprland/workspaces": {
+        "format": "{icon}",
+        "format-icons": {
+        "1": "一",
+        "2": "二",
+        "3": "三",
+        "4": "四",
+        "5": "五",
+        "6": "六",
+        "7": "七",
+        "8": "八",
+        "9": "九",
+        "urgent": "!",
+        "default": "·"
+        },
+        "persistent-workspaces": {
+        "*": 5
+        },
+        "active-only": false,
+        "all-outputs": false,
+        "show-special": false,
+        "disable-scroll": false,
+        "on-click": "activate",
+        "on-scroll-up": "hyprctl dispatch workspace e+1",
+        "on-scroll-down": "hyprctl dispatch workspace e-1"
+    },
+
+    "hyprland/window": {
+        "format": "{class}  {title}",
+        "max-length": 45,
+        "separate-outputs": true,
+        "rewrite": {
+        "(.*) - Mozilla Firefox": "$1",
+        "(.*) — Mozilla Firefox": "$1"
+        }
+    },
+
+    "clock": {
+        "interval": 1,
+        "format-alt": "{:%A  ·  %B %d, %Y  ·  %H:%M:%S}",
+        "tooltip-format": "<tt>{calendar}</tt>",
+        "calendar": {
+        "mode": "month",
+        "mode-mon-col": 3,
+        "weeks-pos": "right",
+        "on-scroll": 1,
+        "format": {
+            "months": "<span color='#89b4fa'><b>{}</b></span>",
+            "days": "{}",
+            "weeks": "<span color='#a6adc8'>[{}]</span>",
+            "weekdays": "<span color='#a6adc8'><b>{}</b></span>",
+            "today": "<span color='#f38ba8'><b><u>{}</u></b></span>"
+        }
+        }
+    },
+
+    "cpu": {
+        "interval": 3,
+        "format": "󰍛  {usage:>2}% | {avg_frequency:.2f} GHz",
+        "tooltip": true
+    },
+
+    "memory": {
+        "interval": 5,
+        "format": "󰘚  {percentage}% | {swapPercentage}%",
+        "tooltip-format": "RAM: {used:0.1f} GiB / {total:0.1f} GiB"
+    },
+
+    "temperature": {
+        "interval": 5,
+        "critical-threshold": 80,
+        "format": "󰔏  {temperatureC}°C",
+        "format-critical": "󰸁  {temperatureC}°C",
+        "tooltip": true
+    },
+
+    "pulseaudio": {
+        "format": "{icon}  {volume}%",
+        "format-muted": "󰝟  muted",
+        "format-icons": {
+        "default": ["󰕿", "󰖀", "󰕾"]
+        },
+        "scroll-step": 1,
+        "on-click": "pavucontrol",
+        "on-click-right": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
+        "tooltip-format": "{desc}\nVolume: {volume}%"
+    },
+
+    "pulseaudio#microphone": {
+        "format": "{format_source}",
+        "format-source": "🎙 {volume}%",
+        "format-source-muted": "🎙 Muted",
+        "on-click": "pamixer --default-source -t",
+        "min-length": 8
+    },
+
+    "network": {
+        "interval": 5,
+        "format-wifi": "󰤨  {signalStrength}%",
+        "format-ethernet": "󰈀  wired",
+        "format-disconnected": "󰤭  offline",
+        "tooltip-format-wifi": "{essid}\nSignal: {signalStrength}%\nIP: {ipaddr}",
+        "tooltip-format-ethernet": "{ifname}\nIP: {ipaddr}",
+        "tooltip-format-disconnected": "Disconnected",
+        "on-click": "nm-connection-editor"
+    },
+
+    "bluetooth": {
+        "format": "󰂯  {status}",
+        "format-disabled": "󰂲  off",
+        "format-connected": "󰂱  {num_connections}",
+        "tooltip-format": "{controller_alias}\nDevices:{device_enumerate}",
+        "on-click": "blueman-manager",
+        "on-click-right": "bluetoothctl power toggle"
+    },
+
+    "battery": {
+        "states": {
+        "warning": 30,
+        "critical": 15
+        },
+        "format": "{icon}  {capacity}% | {time} | {power:.0f} W",
+        "format-charging": "󰂄  {capacity}%",
+        "format-plugged": "󰚥  {capacity}%",
+        "format-time": "{H}:{m}",
+        "format-icons": [
+        "󰁺",
+        "󰁻",
+        "󰁼",
+        "󰁽",
+        "󰁾",
+        "󰁿",
+        "󰂀",
+        "󰂁",
+        "󰂂",
+        "󰁹"
+        ],
+        "tooltip-format": "Draw: {power:.3f}W \nCycles: {cycles}\nHealth: {health}%"
+    },
+
+    "tray": {
+        "icon-size": 16,
+        "spacing": 8
+    }
+}

@@ -1,22 +1,29 @@
 { ... }: {
-    services.flatpak.enable = true;
+    services = {
 
-    services.printing.enable = true; # CUPS
+        flatpak.enable = true;
 
-    services.libinput.enable = true; # touchpad
+        printing.enable = true; # CUPS
 
-    services.openssh.enable = true;
+        libinput.enable = true; # touchpad
 
-    services.fprintd.enable = true; # fingerprint
+        openssh.enable = true;
 
-    services.dnscrypt-proxy = {
-        enable = false;
-        settings = {
-            server_names = ["cloudflare"];
-            proxy = "socks5://127.0.0.1:9050";
-            force_tcp = true;
+        fprintd.enable = true; # fingerprint
+
+        dnscrypt-proxy = {
+            enable = false;
+            settings = {
+                server_names = [ "cloudflare" ];
+                proxy = "socks5://127.0.0.1:9050";
+                force_tcp = true;
+            };
         };
-    };
 
-    services.tor.enable = false;
+        tor.enable = false;
+
+        displayManager.sddm.enable = true;
+        displayManager.sddm.wayland.enable = true;
+        desktopManager.plasma6.enable = true; # backup
+    };
 }

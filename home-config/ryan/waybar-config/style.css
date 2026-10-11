@@ -1,0 +1,203 @@
+/* style.css, hardlinked to ~/.config/waybar */
+
+* {
+  font-family: "JetBrainsMono Nerd Font", "JetBrains Mono", monospace;
+  font-size: 12px;
+  font-weight: 500;
+  min-height: 0;
+  border: none;
+  border-radius: 0;
+}
+
+window#waybar {
+  background: transparent;
+  color: #cdd6f4;
+}
+
+window#waybar > box {
+  background: #181825;
+  border: 1px solid #313244;
+  border-radius: 10px;
+  padding: 0 5px;
+}
+
+/* Shared module styling */
+
+#workspaces,
+#window,
+#clock,
+#cpu,
+#memory,
+#temperature,
+#pulseaudio,
+#network,
+#bluetooth,
+#battery,
+#tray {
+  padding: 0 10px;
+  margin: 5px 3px;
+  border-radius: 7px;
+  background: #1e1e2e;
+  color: #bac2de;
+}
+
+/* Workspaces */
+
+#workspaces {
+  padding: 0 4px;
+  background: #11111b;
+}
+
+#workspaces button {
+  color: #6c7086;
+  background: transparent;
+  padding: 0 9px;
+  margin: 3px 2px;
+  border-radius: 5px;
+  transition: background 150ms ease, color 150ms ease;
+}
+
+#workspaces button:hover {
+  background: #313244;
+  color: #cdd6f4;
+  box-shadow: none;
+}
+
+#workspaces button.active {
+  color: #11111b;
+  background: #89b4fa;
+  font-weight: 800;
+}
+
+#workspaces button.urgent {
+  color: #11111b;
+  background: #f38ba8;
+}
+
+/* Active window */
+
+#window {
+  color: #a6adc8;
+  background: transparent;
+  padding-left: 12px;
+}
+
+window#waybar.empty #window {
+  background: transparent;
+}
+
+/* Clock */
+
+#clock {
+  color: #cdd6f4;
+  background: #242438;
+  border: 1px solid #313244;
+  font-weight: 700;
+}
+
+/* System monitoring */
+
+#cpu {
+  color: #89b4fa;
+}
+
+#memory {
+  color: #cba6f7;
+}
+
+#temperature {
+  color: #94e2d5;
+}
+
+#temperature.critical {
+  color: #f38ba8;
+  background: #30202a;
+}
+
+/* Audio and connectivity */
+
+#pulseaudio, #pulseaudio.microphone {
+  color: #f9e2af;
+}
+
+#pulseaudio.muted, #pulseaudio.microphone.muted {
+  color: #6c7086;
+}
+
+#network {
+  color: #89dceb;
+}
+
+#network.disconnected {
+  color: #f38ba8;
+}
+
+#bluetooth {
+  color: #89b4fa;
+}
+
+#bluetooth.disabled,
+#bluetooth.off {
+  color: #6c7086;
+}
+
+/* Battery */
+
+#battery {
+  color: #a6e3a1;
+}
+
+#battery.charging,
+#battery.plugged {
+  color: #94e2d5;
+}
+
+#battery.warning:not(.charging) {
+  color: #fab387;
+  background: #302820;
+}
+
+#battery.critical:not(.charging) {
+  color: #f38ba8;
+  background: #30202a;
+  animation: blink 1s linear infinite alternate;
+}
+
+/* System tray */
+
+#tray {
+  padding: 0 9px;
+  background: #11111b;
+}
+
+#tray > .passive {
+  -gtk-icon-effect: dim;
+}
+
+#tray > .needs-attention {
+  -gtk-icon-effect: highlight;
+  background: #f38ba8;
+  border-radius: 5px;
+}
+
+/* Tooltips */
+
+tooltip {
+  background: #181825;
+  border: 1px solid #45475a;
+  border-radius: 8px;
+}
+
+tooltip label {
+  color: #cdd6f4;
+  padding: 4px;
+}
+
+/* Critical battery animation */
+
+@keyframes blink {
+  to {
+    background: #181825;
+    color: #f38ba8;
+  }
+}

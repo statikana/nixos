@@ -86,8 +86,8 @@ in
         uv
         harbor-cli
         lldb
-        wezterm
         nvitop
+        wezterm
 
         zoxide
         fzf # file find

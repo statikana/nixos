@@ -4,19 +4,19 @@
 
     programs.bash.shellAliases = {
         # Nix
-        ec = "cd ~/nixos";
-        mods = "cd ~/nixos/modules";
-        rebuild = "sudo nixos-rebuild switch";
-        config = "nvim ~/nixos/configuration.nix";
-        garbage = "nix-store --gc";
-        pks = "nvim ~/nixos/modules/packages.nix";
-        alias = "nvim ~/nixos/modules/aliases.nix";
+        n = "cd ~/nixos && code .";
+        e = "code";
+        reb = "sudo nixos-rebuild switch";
+        gc = "nix-store --gc";
+        pks = "code ~/nixos/modules/packages.nix";
 
         nfm = "nixfmt --indent=4 ~/nixos/*.nix ~/nixos/modules/*.nix && echo \"Done\"";
 
         # Other tools
         z = "zoxide";
         p3 = "python3";
+
+        ff = "fastfetch";
 
         # Common folders
         docs = "cd ~/documents";
