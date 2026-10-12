@@ -6,7 +6,11 @@
         waybar # upper bar
         brightnessctl
         hyprpaper # wallpapers
-        hyprlauncher
+        wofi # launcher
+
+        lm_sensors
+        fanctl
+
         hyprshade # idrk
         wev # wayland events
         playerctl # audio stuff
@@ -16,6 +20,7 @@
         ffmpeg
         cliphist
         blueman
+        pulseaudio
 
         nerd-fonts.jetbrains-mono
     ];

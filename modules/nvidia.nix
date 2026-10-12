@@ -90,8 +90,10 @@ in
         prime = {
             # lspci -k | grep "Class 0300"
             # the formatting is picky
-
-            offload.enable = true;
+            offload = {
+                enable = true;
+                enableOffloadCmd = true;
+            };
             intelBusId = "PCI:0:0:2";
             nvidiaBusId = "PCI:0:1:0";
         };

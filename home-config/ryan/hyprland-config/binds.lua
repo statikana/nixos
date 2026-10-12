@@ -2,15 +2,17 @@ print("binds.lua")
 
 local terminal = "wezterm"
 local fileManager = "dolphin"
-local menu = "hyprlauncher"
+local menu = "wofi"
 
 local mainMod = "SUPER"
+local SCRIPTS = "~/nixos/home-config/ryan/scripts"
 
 hl.bind(mainMod .. " + F", hl.dsp.exec_cmd("firefox"))
 hl.bind(mainMod .. " + Q", hl.dsp.exec_cmd("wezterm"))
-hl.bind(mainMod .. " + W", hl.dsp.exec_cmd("waybar"))
-hl.bind(mainMod .. " + V", hl.dsp.exec_cmd("cliphist list | hyprlauncher --dmenu | cliphist decode | wl-copy"))
+hl.bind(mainMod .. " + W", hl.dsp.exec_cmd(SCRIPTS .. "/waybar-toggle.sh"))
+hl.bind(mainMod .. " + V", hl.dsp.exec_cmd("cliphist list | wofi --dmenu | cliphist decode | wl-copy"))
 hl.bind(mainMod .. " + I", hl.dsp.exec_cmd("hyprpicker --autocopy --format hex"))
+hl.bind(mainMod .. " + N", hl.dsp.exec_cmd("cd ~/nixos && code ."))
 hl.bind("Print", hl.dsp.exec_cmd("hyprshot --freeze --mode region"))
 
 

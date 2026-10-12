@@ -98,6 +98,9 @@ in
 
         ripgrep
         tor
+        
+        powertop
+        dmidecode
 
         # Desktop apps
         qgroundcontrol

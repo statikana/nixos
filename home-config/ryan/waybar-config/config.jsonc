@@ -1,4 +1,7 @@
 // config.jsonc, hardlined to ~/.config/waybar
+
+// left clicking should always be control station / more info
+// right clicking should always be toggle power / status
 {
     "layer": "top",
     "position": "top",
@@ -11,7 +14,12 @@
 
     "modules-left": [
         "hyprland/workspaces",
-        "hyprland/window"
+        // "hyprland/window",
+        "pulseaudio#speaker",
+        "pulseaudio#microphone",
+        "bluetooth",
+        "network",
+        "custom/fan"
     ],
     "modules-center": [
         "clock"
@@ -20,31 +28,26 @@
         "cpu",
         "memory",
         "temperature",
-        "pulseaudio",
-        "pulseaudio#microphone",
-        "network",
-        "bluetooth",
-        "battery",
-        "tray"
+        "battery"
     ],
 
     "hyprland/workspaces": {
         "format": "{icon}",
         "format-icons": {
-        "1": "一",
-        "2": "二",
-        "3": "三",
-        "4": "四",
-        "5": "五",
-        "6": "六",
-        "7": "七",
-        "8": "八",
-        "9": "九",
-        "urgent": "!",
-        "default": "·"
+            "1": "一",
+            "2": "二",
+            "3": "三",
+            "4": "四",
+            "5": "五",
+            "6": "六",
+            "7": "七",
+            "8": "八",
+            "9": "九",
+            "urgent": "!",
+            "default": "·"
         },
         "persistent-workspaces": {
-        "*": 5
+            "*": 4
         },
         "active-only": false,
         "all-outputs": false,
@@ -56,56 +59,28 @@
     },
 
     "hyprland/window": {
-        "format": "{class}  {title}",
-        "max-length": 45,
+        "format": "{class} | {title}",
+        "max-length": 80,
         "separate-outputs": true,
         "rewrite": {
-        "(.*) - Mozilla Firefox": "$1",
-        "(.*) — Mozilla Firefox": "$1"
+            "(.*) - Mozilla Firefox": "$1",
+            "(.*) — Mozilla Firefox": "$1"
         }
     },
 
-    "clock": {
-        "interval": 1,
-        "format-alt": "{:%A  ·  %B %d, %Y  ·  %H:%M:%S}",
-        "tooltip-format": "<tt>{calendar}</tt>",
-        "calendar": {
-        "mode": "month",
-        "mode-mon-col": 3,
-        "weeks-pos": "right",
-        "on-scroll": 1,
-        "format": {
-            "months": "<span color='#89b4fa'><b>{}</b></span>",
-            "days": "{}",
-            "weeks": "<span color='#a6adc8'>[{}]</span>",
-            "weekdays": "<span color='#a6adc8'><b>{}</b></span>",
-            "today": "<span color='#f38ba8'><b><u>{}</u></b></span>"
-        }
-        }
-    },
 
-    "cpu": {
-        "interval": 3,
-        "format": "󰍛  {usage:>2}% | {avg_frequency:.2f} GHz",
-        "tooltip": true
-    },
 
-    "memory": {
-        "interval": 5,
-        "format": "󰘚  {percentage}% | {swapPercentage}%",
-        "tooltip-format": "RAM: {used:0.1f} GiB / {total:0.1f} GiB"
-    },
+    // GET AUDIO DEVICES:
+    // wpctl list-devices
+    // pipe into less, search for Mic or speaker (or sink)
+    // last call was:
+    // id 64 is builtin HiFi speaker
+    // id 65 is builtin stereo mic (dont use)
+    // id 66 is builtin digital mic
+    // 
 
-    "temperature": {
-        "interval": 5,
-        "critical-threshold": 80,
-        "format": "󰔏  {temperatureC}°C",
-        "format-critical": "󰸁  {temperatureC}°C",
-        "tooltip": true
-    },
-
-    "pulseaudio": {
-        "format": "{icon}  {volume}%",
+    "pulseaudio#speaker": {
+        "format": "{icon} {volume}%",
         "format-muted": "󰝟  muted",
         "format-icons": {
         "default": ["󰕿", "󰖀", "󰕾"]
@@ -118,40 +93,98 @@
 
     "pulseaudio#microphone": {
         "format": "{format_source}",
-        "format-source": "🎙 {volume}%",
-        "format-source-muted": "🎙 Muted",
-        "on-click": "pamixer --default-source -t",
-        "min-length": 8
-    },
-
-    "network": {
-        "interval": 5,
-        "format-wifi": "󰤨  {signalStrength}%",
-        "format-ethernet": "󰈀  wired",
-        "format-disconnected": "󰤭  offline",
-        "tooltip-format-wifi": "{essid}\nSignal: {signalStrength}%\nIP: {ipaddr}",
-        "tooltip-format-ethernet": "{ifname}\nIP: {ipaddr}",
-        "tooltip-format-disconnected": "Disconnected",
-        "on-click": "nm-connection-editor"
+        "format-source": " ready",
+        "format-source-muted": " muted",
+        "on-click": "pavucontrol",
+        "on-click-right": "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle",
+        "tooltip": true
     },
 
     "bluetooth": {
-        "format": "󰂯  {status}",
-        "format-disabled": "󰂲  off",
+        "format": "󰂯 {status}",
+        "format-disabled": "󰂲 off",
         "format-connected": "󰂱  {num_connections}",
         "tooltip-format": "{controller_alias}\nDevices:{device_enumerate}",
         "on-click": "blueman-manager",
-        "on-click-right": "bluetoothctl power toggle"
+        "on-click-right": "/home/ryan/nixos/home-config/ryan/scripts/bluetoothctl-toggle.sh"
+    },
+
+
+    "network": {
+        "interval": 5,
+        "min-length": 25,
+        // "format-wifi": "󰤨  {essid}  {bandwidthUpBits}  {bandwidthDownBits}",
+        "format-wifi": "󰤨  {essid}  {bandwidthUpBits}",
+        "format-ethernet": "󰈀  wired",
+        "format-disconnected": "󰤭  offline",
+        "format-disabled": "󰤭  disabled",
+        "tooltip-format-wifi": "Signal: {signalStrength}%\nIP: {ipaddr}\nGate: {gwaddr}\nMAC: {bssid}\nNetMask v4: {netmask}\nNetMask v6: {netmask6}\nFreq: {frequency} GHz\nStength: {signaldBm} dBm",
+        "tooltip-format-ethernet": "{ifname}\nIP: {ipaddr}",
+        "tooltip-format-disconnected": "Disconnected",
+        "on-click": "nm-connection-editor",
+        "on-click-right": "/home/ryan/nixos/home-config/ryan/scripts/nmcli-toggle.sh"
+    },
+
+    "custom/fan": {
+        "min-length": 10,
+        "exec": "/home/ryan/nixos/home-config/ryan/scripts/fan/fan-status.sh",
+        "return-type": "json",
+        "interval": 2,
+        "format": "{}",
+        "on-click": "/home/ryan/nixos/home-config/ryan/scripts/fan/fan-toggle.sh"
+    },
+
+
+    "clock": {
+        "interval": 1,
+        "format": "{:%A  ·  %I:%M %p  ·  %B %d}",
+        "tooltip-format": "<tt>{calendar}</tt>",
+        "calendar": {
+            "mode": "month",
+            "mode-mon-col": 3,
+            "weeks-pos": "right",
+            "on-scroll": 1,
+            "format": {
+                "months": "<span color='#89b4fa'><b>{}</b></span>",
+                "days": "{}",
+                "weeks": "<span color='#a6adc8'>[{}]</span>",
+                "weekdays": "<span color='#a6adc8'><b>{}</b></span>",
+                "today": "<span color='#f38ba8'><b><u>{}</u></b></span>"
+            }
+        }
+    },
+
+    "cpu": {
+        "interval": 3,
+        "min-length": 15,
+        "format": " {usage:>2}% | {avg_frequency:.2f} GHz",
+        "tooltip": true
+    },
+
+    "memory": {
+        "interval": 5,
+        "min-length": 15,
+        "format": "  {percentage}% | {swapPercentage}%",
+        "tooltip-format": "RAM: {used:0.1f} GiB / {total:0.1f} GiB"
+    },
+
+    "temperature": {
+        "interval": 5,
+        "critical-threshold": 80,
+        "format": "󰔏  {temperatureC}°C",
+        "format-critical": "󰸁  {temperatureC}°C",
+        "tooltip": true
     },
 
     "battery": {
+        "interval": 3,
         "states": {
-        "warning": 30,
-        "critical": 15
+            "warning": 30,
+            "critical": 15
         },
-        "format": "{icon}  {capacity}% | {time} | {power:.0f} W",
-        "format-charging": "󰂄  {capacity}%",
-        "format-plugged": "󰚥  {capacity}%",
+        "min-length": 25,
+        "format": "{icon} {capacity}% | {time} | -{power:.0f} W",
+        "format-charging": "{icon} {capacity}% | {time} | +{power:.0f} W",
         "format-time": "{H}:{m}",
         "format-icons": [
         "󰁺",
