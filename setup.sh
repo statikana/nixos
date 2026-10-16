@@ -11,3 +11,5 @@
 CONFIG_BASE="/home/ryan/nixos"
 SCRIPT_BASE="${CONFIG_BASE}/home-config/ryan/scripts"
 chmod +x --recursive ${SCRIPT_BASE}
+
+# battery config

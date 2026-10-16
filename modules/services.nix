@@ -1,4 +1,4 @@
-{ ... }: {
+{ pkgs, ... }: {
     services = {
 
         flatpak.enable = true;
@@ -33,8 +33,8 @@
         tlp = {
             enable = true;
             settings = {
-                START_CHARGE_THRESH_BAT0 = 40;
-                STOP_CHARGE_THRESH_BAT0 = 80;
+                START_CHARGE_THRESH_BAT0 = 70;
+                STOP_CHARGE_THRESH_BAT0 = 85;
             };
         };
         thinkfan = {
@@ -56,14 +56,14 @@
 
             # [fan level, step-down temperature, step-up temperature]
             levels = [
-                [ 0 0 55 ]
-                [ 1 48 60 ]
-                [ 2 50 61 ]
+                [ 2 0 52 ]
                 [ 3 52 63 ]
                 [ 6 56 65 ]
                 [ 7 60 85 ]
                 [ "level auto" 80 32767 ]
             ];
         };
+
+        udev.extraRules = ''ACTION=="add|bind", SUBSYSTEM=="platform", DRIVER=="thinkpad_acpi", RUN+="${pkgs.coreutils}/bin/chgrp fan_ctl /proc/acpi/ibm/fan", RUN+="${pkgs.coreutils}/bin/chmod 0664 /proc/acpi/ibm/fan"'';
     };
 }

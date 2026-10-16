@@ -37,7 +37,6 @@ in
         # Formatting
         nixfmt
         nixd
-        clang-tools
 
         # Languages
         rustup
@@ -54,6 +53,7 @@ in
                 stable-baselines3
                 openmpi
                 pygame-ce
+                kconfiglib
             ]
         ))
 
@@ -66,6 +66,8 @@ in
         nodejs
         openmpi
         opencodePkgs.opencode
+        claude-code
+        cmake
 
         # CLI Utils
         ffmpeg

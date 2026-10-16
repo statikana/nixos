@@ -2,7 +2,7 @@ print("binds.lua")
 
 local terminal = "wezterm"
 local fileManager = "dolphin"
-local menu = "wofi"
+local menu = "wofi --show drun"
 
 local mainMod = "SUPER"
 local SCRIPTS = "~/nixos/home-config/ryan/scripts"
@@ -13,7 +13,10 @@ hl.bind(mainMod .. " + W", hl.dsp.exec_cmd(SCRIPTS .. "/waybar-toggle.sh"))
 hl.bind(mainMod .. " + V", hl.dsp.exec_cmd("cliphist list | wofi --dmenu | cliphist decode | wl-copy"))
 hl.bind(mainMod .. " + I", hl.dsp.exec_cmd("hyprpicker --autocopy --format hex"))
 hl.bind(mainMod .. " + N", hl.dsp.exec_cmd("cd ~/nixos && code ."))
-hl.bind("Print", hl.dsp.exec_cmd("hyprshot --freeze --mode region"))
+hl.bind(mainMod .. " + D", hl.dsp.exec_cmd("cd ~/documents && code ."))
+
+hl.bind(mainMod .. " + P", hl.dsp.exec_cmd("wezterm "))
+hl.bind("Print", hl.dsp.exec_cmd("hyprshot --mode region"))
 
 
 -- Example binds, see https://wiki.hypr.land/Configuring/Basics/Binds/ for more
@@ -24,7 +27,7 @@ hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("command -v hyprshutdown >/dev/null 2
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
 -- hl.bind(mainMod .. " + V", hl.dsp.window.float({ action = "toggle" }))
 hl.bind(mainMod .. " + R", hl.dsp.exec_cmd(menu))
-hl.bind(mainMod .. " + P", hl.dsp.window.pseudo())
+-- hl.bind(mainMod .. " + P", hl.dsp.window.pseudo())
 hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit"))    -- dwindle only
 
 -- Move focus with mainMod + arrow keys

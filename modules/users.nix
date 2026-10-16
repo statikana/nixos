@@ -7,15 +7,9 @@
             "wheel"
             "docker"
             "input"
+            "fan_ctl"
         ];
     };
 
-    home-manager.users."ryan" = { pkgs, ... }: {
-        home.packages = [ ];
-        programs.bash.enable = true;
 
-        # The state version is required and should stay at the version you
-        # originally installed.
-        home.stateVersion = "26.05";
-    };
 }

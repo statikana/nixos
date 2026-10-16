@@ -13,7 +13,6 @@
         nfm = "nixfmt --indent=4 ~/nixos/*.nix ~/nixos/modules/*.nix && echo \"Done\"";
 
         # Other tools
-        z = "zoxide";
         p3 = "python3";
 
         ff = "fastfetch";

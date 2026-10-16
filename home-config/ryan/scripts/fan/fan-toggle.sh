@@ -1,5 +1,4 @@
-#!/home/ryan/.nix-profile/bin/sh
-
+#!/usr/bin/env bash
 mode=$(cat $XDG_RUNTIME_DIR/fan-mode 2>/dev/null || echo auto)
 
 case "$mode" in

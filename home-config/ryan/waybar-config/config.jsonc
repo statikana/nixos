@@ -1,4 +1,4 @@
-// config.jsonc, hardlined to ~/.config/waybar
+// config.jsonc, hardlinked to ~/.config/waybar
 
 // left clicking should always be control station / more info
 // right clicking should always be toggle power / status
@@ -51,11 +51,12 @@
         },
         "active-only": false,
         "all-outputs": false,
-        "show-special": false,
-        "disable-scroll": false,
-        "on-click": "activate",
-        "on-scroll-up": "hyprctl dispatch workspace e+1",
-        "on-scroll-down": "hyprctl dispatch workspace e-1"
+        "show-special": true,
+        "disable-scroll": true,
+        "workspace-taskbar": {
+            "enable": true,
+            "on-click-window": "hyprctl dispatch 'hl.dsp.focus({ window = { address = \"{address}\" } })'"
+        }
     },
 
     "hyprland/window": {
@@ -80,8 +81,9 @@
     // 
 
     "pulseaudio#speaker": {
+        "min-length": 12,
         "format": "{icon} {volume}%",
-        "format-muted": "󰝟  muted",
+        "format-muted": "󰝟 muted",
         "format-icons": {
         "default": ["󰕿", "󰖀", "󰕾"]
         },
@@ -92,21 +94,25 @@
     },
 
     "pulseaudio#microphone": {
+        "min-length": 12,
         "format": "{format_source}",
         "format-source": " ready",
-        "format-source-muted": " muted",
+        "format-source-muted": "  muted",
         "on-click": "pavucontrol",
         "on-click-right": "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle",
         "tooltip": true
     },
 
     "bluetooth": {
+        "controller": "tpacpi_bluetooth_sw",  // thinkpad wifi controller ( rfkill )
+        "min-length": 8,
         "format": "󰂯 {status}",
         "format-disabled": "󰂲 off",
         "format-connected": "󰂱  {num_connections}",
-        "tooltip-format": "{controller_alias}\nDevices:{device_enumerate}",
+        "format-no-controller": "...",
+        "tooltip-format": "Controller: {controller_alias}\nDevices:{device_enumerate}",
         "on-click": "blueman-manager",
-        "on-click-right": "/home/ryan/nixos/home-config/ryan/scripts/bluetoothctl-toggle.sh"
+        "on-click-right": "rfkill toggle bluetooth"
     },
 
 
@@ -116,13 +122,13 @@
         // "format-wifi": "󰤨  {essid}  {bandwidthUpBits}  {bandwidthDownBits}",
         "format-wifi": "󰤨  {essid}  {bandwidthUpBits}",
         "format-ethernet": "󰈀  wired",
-        "format-disconnected": "󰤭  offline",
+        "format-disconnected": "󰤭  offline...",
         "format-disabled": "󰤭  disabled",
         "tooltip-format-wifi": "Signal: {signalStrength}%\nIP: {ipaddr}\nGate: {gwaddr}\nMAC: {bssid}\nNetMask v4: {netmask}\nNetMask v6: {netmask6}\nFreq: {frequency} GHz\nStength: {signaldBm} dBm",
         "tooltip-format-ethernet": "{ifname}\nIP: {ipaddr}",
         "tooltip-format-disconnected": "Disconnected",
         "on-click": "nm-connection-editor",
-        "on-click-right": "/home/ryan/nixos/home-config/ryan/scripts/nmcli-toggle.sh"
+        "on-click-right": "rfkill toggle wifi"
     },
 
     "custom/fan": {
@@ -136,7 +142,7 @@
 
 
     "clock": {
-        "interval": 1,
+        "interval": 60,
         "format": "{:%A  ·  %I:%M %p  ·  %B %d}",
         "tooltip-format": "<tt>{calendar}</tt>",
         "calendar": {
@@ -170,6 +176,7 @@
 
     "temperature": {
         "interval": 5,
+        "thermal-zone": 8,
         "critical-threshold": 80,
         "format": "󰔏  {temperatureC}°C",
         "format-critical": "󰸁  {temperatureC}°C",

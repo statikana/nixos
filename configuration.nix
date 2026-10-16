@@ -11,6 +11,7 @@ in
     imports = [
         "/home/ryan/nixos/modules"
         "${home-manager}/nixos"
+        "/home/ryan/nixos/hardware-configuration.nix"
     ];
 
     home-manager.users."ryan" = import "/home/ryan/nixos/home-config/ryan";
