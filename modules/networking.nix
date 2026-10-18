@@ -9,9 +9,10 @@
     networking.networkmanager.enable = true;
     # networking.nameservers = ["127.0.0.1"];
 
-    # for dockerd I think
-    networking.firewall.allowedTCPPorts = [ 2375 ];
-
     # networking.firewall.allowedUDPPorts = [ ... ];
     # networking.firewall.enable = false;
+
+    # NetworkManager-wait-online blocks boot for ~4-5s waiting for network-online.target;
+    # nothing on this machine actually needs that guarantee at boot.
+    systemd.services.NetworkManager-wait-online.enable = false;
 }

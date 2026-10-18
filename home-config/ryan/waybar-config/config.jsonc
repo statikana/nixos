@@ -117,26 +117,33 @@
 
 
     "network": {
+        // wlp0s20f3
+        // wl p0 s20 f3
+        //
+        // wl  = wlan
+        // p0  = pci bus 0
+        // s20 = slot 20 (on pci bus slot 0)
+        // f3  = function 3? maybe index of <BROADCAST,MULTICAST,UP,LOWER_UP> (ip link list)
         "interval": 5,
         "min-length": 25,
         // "format-wifi": "󰤨  {essid}  {bandwidthUpBits}  {bandwidthDownBits}",
-        "format-wifi": "󰤨  {essid}  {bandwidthUpBits}",
+        "format-wifi": "󰤨  {essid}  {bandwidthDownBits}",
         "format-ethernet": "󰈀  wired",
         "format-disconnected": "󰤭  offline...",
         "format-disabled": "󰤭  disabled",
         "tooltip-format-wifi": "Signal: {signalStrength}%\nIP: {ipaddr}\nGate: {gwaddr}\nMAC: {bssid}\nNetMask v4: {netmask}\nNetMask v6: {netmask6}\nFreq: {frequency} GHz\nStength: {signaldBm} dBm",
         "tooltip-format-ethernet": "{ifname}\nIP: {ipaddr}",
-        "tooltip-format-disconnected": "Disconnected",
+        "tooltip-format-disconnected": "Disconncted",
         "on-click": "nm-connection-editor",
         "on-click-right": "rfkill toggle wifi"
     },
 
     "custom/fan": {
         "min-length": 10,
+        "interval": 2,
         "exec": "/home/ryan/nixos/home-config/ryan/scripts/fan/fan-status.sh",
         "return-type": "json",
-        "interval": 2,
-        "format": "{}",
+        "format": "{text}",
         "on-click": "/home/ryan/nixos/home-config/ryan/scripts/fan/fan-toggle.sh"
     },
 
@@ -189,6 +196,12 @@
             "warning": 30,
             "critical": 15
         },
+        "events": { // 0 = warning, second 0 is default color for warning
+            "on-discharging-warning": "hyprctl notify 0 4000 0 'Charge your damn computer'",
+            "on-discharging-critical": "hyprctl notify 1 10000 1 'PLUG ME IN BEFORE YOU KILL ME'",
+            "on-charging-100": "hyprctl notify 0 2000 0 'ur good fam'"
+        },
+        "full-at": 85, // STOP_CHARGE_THRESH_BAT0
         "min-length": 25,
         "format": "{icon} {capacity}% | {time} | -{power:.0f} W",
         "format-charging": "{icon} {capacity}% | {time} | +{power:.0f} W",

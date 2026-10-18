@@ -10,6 +10,8 @@
 
         lm_sensors
         fanctl
+        wirelesstools
+        iw
 
         hyprshade # idrk
         wev # wayland events
