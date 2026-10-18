@@ -8,6 +8,7 @@
             "docker"
             "input"
             "fan_ctl"
+            "power_ctl"
         ];
     };
 

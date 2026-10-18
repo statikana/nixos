@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <object class="GtkMenu" id="menu">
+    <child>
+      <object class="GtkMenuItem" id="quiet">
+        <property name="visible">true</property>
+        <property name="label">󰠝  quiet</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="auto">
+        <property name="visible">true</property>
+        <property name="label">󱜝  auto</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="max">
+        <property name="visible">true</property>
+        <property name="label">󱜝  max</property>
+      </object>
+    </child>
+  </object>
+</interface>

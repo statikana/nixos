@@ -1,5 +1,3 @@
-print("input.lua")
-
 hl.config({
     input = {
         kb_layout  = "us",

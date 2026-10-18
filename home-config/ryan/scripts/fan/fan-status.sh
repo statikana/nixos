@@ -4,15 +4,15 @@ RPM=$(cat /proc/acpi/ibm/fan | grep -oP "speed:\s*\K[0-9]+")
 
 case "$mode" in
     quiet)
-        printf "{\"text\":\"󰠝 <span>quiet</span> [$RPM rpm]\",\"class\":\"quiet\"}\n"
+        printf "{\"text\":\"󰠝 <span>quiet</span>\",\"class\":\"quiet\",\"tooltip\":\"$RPM rpm\"}\n"
         ;;
     auto)
-        printf "{\"text\":\"󱜝 <span>auto</span> [$RPM rpm]\",\"class\":\"auto\"}\n"
+        printf "{\"text\":\"󱜝 <span>auto</span>\",\"class\":\"auto\",\"tooltip\":\"$RPM rpm\"}\n"
         ;;
     max)
-        printf "{\"text\":\"󱜝 <span>max</span> [$RPM rpm]\",\"class\":\"max\"}\n"
+        printf "{\"text\":\"󱜝 <span>max</span>\",\"class\":\"max\",\"tooltip\":\"$RPM rpm\"}\n"
         ;;
     *)
-        printf "{\"text\":\"<span>?</span> [$RPM rpm]\",\"class\":\"unknown\"}\n"
+        printf "{\"text\":\"<span>?</span>\",\"class\":\"unknown\",\"tooltip\":\"$RPM rpm\"}\n"
         ;;
 esac

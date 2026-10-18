@@ -1,62 +1,89 @@
-// config.jsonc, hardlinked to ~/.config/waybar
+// config.jsonc, symlinked to ~/.config/waybar
 
 // left clicking should always be control station / more info
 // right clicking should always be toggle power / status
 {
     "layer": "top",
     "position": "top",
-    "height": 38,
-    "spacing": 6,
+    "height": 44,
+    "spacing": 4,
     "margin-top": 8,
     "margin-left": 10,
     "margin-right": 10,
     "reload_style_on_change": true,
 
     "modules-left": [
-        "hyprland/workspaces",
-        // "hyprland/window",
+        "group/workspaces",
         "pulseaudio#speaker",
         "pulseaudio#microphone",
         "bluetooth",
         "network",
-        "custom/fan"
+        "custom/fan-menu",
+        "custom/power-menu",
+        "mpris"
     ],
     "modules-center": [
         "clock"
     ],
     "modules-right": [
-        "cpu",
-        "memory",
-        "temperature",
+        "idle_inhibitor",
+        "backlight",
+        "group/stats",
         "battery"
+        // "tray"
     ],
 
-    "hyprland/workspaces": {
-        "format": "{icon}",
-        "format-icons": {
-            "1": "一",
-            "2": "二",
-            "3": "三",
-            "4": "四",
-            "5": "五",
-            "6": "六",
-            "7": "七",
-            "8": "八",
-            "9": "九",
-            "urgent": "!",
-            "default": "·"
-        },
-        "persistent-workspaces": {
-            "*": 4
-        },
-        "active-only": false,
-        "all-outputs": false,
-        "show-special": true,
-        "disable-scroll": true,
-        "workspace-taskbar": {
-            "enable": true,
-            "on-click-window": "hyprctl dispatch 'hl.dsp.focus({ window = { address = \"{address}\" } })'"
-        }
+    // this Hyprland fork dispatches via its Lua API (hl.dsp.*), which the compiled
+    // hyprland/workspaces module's built-in click handler doesn't speak -- so we
+    // drive workspace switching ourselves via workspace-switch.sh instead
+    "group/workspaces": {
+        "orientation": "horizontal",
+        "modules": [
+            "custom/workspace-1",
+            "custom/workspace-2",
+            "custom/workspace-3",
+            "custom/workspace-4"
+        ]
+    },
+
+    "custom/workspace-1": {
+        "min-length": 1,
+        "interval": 0.3,
+        "exec": "/home/ryan/nixos/home-config/ryan/scripts/workspace/workspace-button-status.sh 1",
+        "return-type": "json",
+        "format": "{text}",
+        "tooltip": false,
+        "on-click": "/home/ryan/nixos/home-config/ryan/scripts/workspace/workspace-switch.sh 1"
+    },
+
+    "custom/workspace-2": {
+        "min-length": 1,
+        "interval": 0.3,
+        "exec": "/home/ryan/nixos/home-config/ryan/scripts/workspace/workspace-button-status.sh 2",
+        "return-type": "json",
+        "format": "{text}",
+        "tooltip": false,
+        "on-click": "/home/ryan/nixos/home-config/ryan/scripts/workspace/workspace-switch.sh 2"
+    },
+
+    "custom/workspace-3": {
+        "min-length": 1,
+        "interval": 0.3,
+        "exec": "/home/ryan/nixos/home-config/ryan/scripts/workspace/workspace-button-status.sh 3",
+        "return-type": "json",
+        "format": "{text}",
+        "tooltip": false,
+        "on-click": "/home/ryan/nixos/home-config/ryan/scripts/workspace/workspace-switch.sh 3"
+    },
+
+    "custom/workspace-4": {
+        "min-length": 1,
+        "interval": 0.3,
+        "exec": "/home/ryan/nixos/home-config/ryan/scripts/workspace/workspace-button-status.sh 4",
+        "return-type": "json",
+        "format": "{text}",
+        "tooltip": false,
+        "on-click": "/home/ryan/nixos/home-config/ryan/scripts/workspace/workspace-switch.sh 4"
     },
 
     "hyprland/window": {
@@ -78,10 +105,10 @@
     // id 64 is builtin HiFi speaker
     // id 65 is builtin stereo mic (dont use)
     // id 66 is builtin digital mic
-    // 
+    //
 
     "pulseaudio#speaker": {
-        "min-length": 12,
+        "min-length": 6,
         "format": "{icon} {volume}%",
         "format-muted": "󰝟 muted",
         "format-icons": {
@@ -94,10 +121,10 @@
     },
 
     "pulseaudio#microphone": {
-        "min-length": 12,
+        "min-length": 6,
         "format": "{format_source}",
-        "format-source": " ready",
-        "format-source-muted": "  muted",
+        "format-source": " ready",
+        "format-source-muted": "  muted",
         "on-click": "pavucontrol",
         "on-click-right": "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle",
         "tooltip": true
@@ -105,12 +132,14 @@
 
     "bluetooth": {
         "controller": "tpacpi_bluetooth_sw",  // thinkpad wifi controller ( rfkill )
-        "min-length": 8,
+        "min-length": 3,
         "format": "󰂯 {status}",
         "format-disabled": "󰂲 off",
         "format-connected": "󰂱  {num_connections}",
         "format-no-controller": "...",
-        "tooltip-format": "Controller: {controller_alias}\nDevices:{device_enumerate}",
+        "tooltip-format": "Controller: {controller_alias} ({controller_address})\nConnected devices: {num_connections}\n{device_enumerate}",
+        "tooltip-format-enumerate-connected": "  · {device_alias} ({device_address})",
+        "tooltip-format-enumerate-connected-battery": "  · {device_alias} ({device_address}) — {device_battery_percentage}%",
         "on-click": "blueman-manager",
         "on-click-right": "rfkill toggle bluetooth"
     },
@@ -124,29 +153,69 @@
         // p0  = pci bus 0
         // s20 = slot 20 (on pci bus slot 0)
         // f3  = function 3? maybe index of <BROADCAST,MULTICAST,UP,LOWER_UP> (ip link list)
-        "interval": 5,
-        "min-length": 25,
-        // "format-wifi": "󰤨  {essid}  {bandwidthUpBits}  {bandwidthDownBits}",
-        "format-wifi": "󰤨  {essid}  {bandwidthDownBits}",
+        "interval": 3,
+        "min-length": 10,
+        "format-wifi": "󰤨  {essid}",
         "format-ethernet": "󰈀  wired",
         "format-disconnected": "󰤭  offline...",
         "format-disabled": "󰤭  disabled",
-        "tooltip-format-wifi": "Signal: {signalStrength}%\nIP: {ipaddr}\nGate: {gwaddr}\nMAC: {bssid}\nNetMask v4: {netmask}\nNetMask v6: {netmask6}\nFreq: {frequency} GHz\nStength: {signaldBm} dBm",
-        "tooltip-format-ethernet": "{ifname}\nIP: {ipaddr}",
+        "tooltip-format-wifi": "{essid} · {signalStrength}% signal ({signaldBm} dBm)\nFreq: {frequency} GHz\n\nIP: {ipaddr}/{cidr}\nGateway: {gwaddr}\nNetmask: {netmask}\nMAC (BSSID): {bssid}\n\n↓ {bandwidthDownBits}   ↑ {bandwidthUpBits}",
+        "tooltip-format-ethernet": "{ifname}\nIP: {ipaddr}/{cidr}\n↓ {bandwidthDownBits}   ↑ {bandwidthUpBits}",
         "tooltip-format-disconnected": "Disconncted",
         "on-click": "nm-connection-editor",
         "on-click-right": "rfkill toggle wifi"
     },
 
-    "custom/fan": {
-        "min-length": 10,
-        "interval": 2,
+    "custom/fan-menu": {
+        "min-length": 6,
+        "interval": 1,
         "exec": "/home/ryan/nixos/home-config/ryan/scripts/fan/fan-status.sh",
         "return-type": "json",
         "format": "{text}",
-        "on-click": "/home/ryan/nixos/home-config/ryan/scripts/fan/fan-toggle.sh"
+        "menu": "on-click",
+        "menu-file": "/home/ryan/nixos/home-config/ryan/waybar-config/menus/fan-menu.xml",
+        "menu-actions": {
+            "quiet": "/home/ryan/nixos/home-config/ryan/scripts/fan/fan-quiet.sh",
+            "auto": "/home/ryan/nixos/home-config/ryan/scripts/fan/fan-auto.sh",
+            "max": "/home/ryan/nixos/home-config/ryan/scripts/fan/fan-max.sh"
+        }
     },
 
+    "custom/power-menu": {
+        "min-length": 6,
+        "interval": 2,
+        "exec": "/home/ryan/nixos/home-config/ryan/scripts/power/power-status.sh",
+        "return-type": "json",
+        "format": "{text}",
+        "menu": "on-click",
+        "menu-file": "/home/ryan/nixos/home-config/ryan/waybar-config/menus/power-menu.xml",
+        "menu-actions": {
+            "performance": "/home/ryan/nixos/home-config/ryan/scripts/power/power-performance.sh",
+            "balanced": "/home/ryan/nixos/home-config/ryan/scripts/power/power-balanced.sh",
+            "saver": "/home/ryan/nixos/home-config/ryan/scripts/power/power-saver.sh"
+        }
+    },
+
+    // now-playing; shows nothing when no player is active
+    "mpris": {
+        "interval": 1,
+        "format": "{status_icon} {dynamic}",
+        "format-stopped": "",
+        "status-icons": {
+            "playing": "▶",
+            "paused": "⏸",
+            "stopped": ""
+        },
+        "title-len": 22,
+        "artist-len": 16,
+        "dynamic-len": 36,
+        "dynamic-order": ["title", "artist"],
+        "on-click": "playerctl play-pause",
+        "on-click-right": "playerctl next",
+        "on-scroll-up": "playerctl next",
+        "on-scroll-down": "playerctl previous",
+        "tooltip-format": "{player}: {dynamic}"
+    },
 
     "clock": {
         "interval": 60,
@@ -167,31 +236,60 @@
         }
     },
 
+    "idle_inhibitor": {
+        "format": "{icon}",
+        "format-icons": {
+            "activated": "󰈈",
+            "deactivated": "󰾪"
+        },
+        "tooltip-format-activated": "Idle inhibitor: on (screen stays awake)",
+        "tooltip-format-deactivated": "Idle inhibitor: off"
+    },
+
+    "backlight": {
+        "interval": 2,
+        "min-length": 5,
+        "format": "{icon} {percent}%",
+        "format-icons": ["󰃞", "󰃟", "󰃠"],
+        "reverse-scrolling": true,
+        "tooltip-format": "Backlight: {percent}%\nscroll to adjust"
+    },
+
+    "group/stats": {
+        "orientation": "horizontal",
+        "modules": [
+            "cpu",
+            "memory",
+            "temperature"
+        ]
+    },
+
     "cpu": {
-        "interval": 3,
-        "min-length": 15,
-        "format": " {usage:>2}% | {avg_frequency:.2f} GHz",
-        "tooltip": true
+        "interval": 2,
+        "min-length": 10,
+        "format": "󰘚 {usage:>2}%",
+        "tooltip-format": "Load: {load}\nFreq: {min_frequency}-{max_frequency} GHz (avg {avg_frequency} GHz)\n\n{usage0:>3}% {usage1:>3}% {usage2:>3}% {usage3:>3}% {usage4:>3}%\n{usage5:>3}% {usage6:>3}% {usage7:>3}% {usage8:>3}% {usage9:>3}%\n{usage10:>3}% {usage11:>3}% {usage12:>3}% {usage13:>3}% {usage14:>3}%\n{usage15:>3}% {usage16:>3}% {usage17:>3}% {usage18:>3}% {usage19:>3}%"
     },
 
     "memory": {
-        "interval": 5,
-        "min-length": 15,
-        "format": "  {percentage}% | {swapPercentage}%",
-        "tooltip-format": "RAM: {used:0.1f} GiB / {total:0.1f} GiB"
+        "interval": 3,
+        "min-length": 9,
+        "format": "󰍛 {percentage}%",
+        "tooltip-format": "RAM: {used:0.1f} / {total:0.1f} GiB ({percentage}%)\nAvailable: {avail:0.1f} GiB\n\nSwap: {swapUsed:0.1f} / {swapTotal:0.1f} GiB ({swapPercentage}%)"
     },
 
     "temperature": {
-        "interval": 5,
+        "interval": 3,
+        "min-length": 8,
         "thermal-zone": 8,
         "critical-threshold": 80,
         "format": "󰔏  {temperatureC}°C",
         "format-critical": "󰸁  {temperatureC}°C",
-        "tooltip": true
+        "tooltip-format": "{temperatureC}°C · {temperatureF}°F · {temperatureK}K\nCritical threshold: 80°C"
     },
 
     "battery": {
-        "interval": 3,
+        "interval": 2,
         "states": {
             "warning": 30,
             "critical": 15
@@ -202,9 +300,9 @@
             "on-charging-100": "hyprctl notify 0 2000 0 'ur good fam'"
         },
         "full-at": 85, // STOP_CHARGE_THRESH_BAT0
-        "min-length": 25,
-        "format": "{icon} {capacity}% | {time} | -{power:.0f} W",
-        "format-charging": "{icon} {capacity}% | {time} | +{power:.0f} W",
+        "min-length": 14,
+        "format": "{icon} {capacity}% {power:.0f}W",
+        "format-charging": "{icon} {capacity}% +{power:.0f}W",
         "format-time": "{H}:{m}",
         "format-icons": [
         "󰁺",
@@ -218,11 +316,11 @@
         "󰂂",
         "󰁹"
         ],
-        "tooltip-format": "Draw: {power:.3f}W \nCycles: {cycles}\nHealth: {health}%"
+        "tooltip-format": "{capacity}% · {time} remaining\nDraw: {power:.1f}W\n\nCycles: {cycles}\nHealth: {health}%"
     },
 
     "tray": {
-        "icon-size": 16,
-        "spacing": 8
+        "icon-size": 15,
+        "spacing": 6
     }
 }

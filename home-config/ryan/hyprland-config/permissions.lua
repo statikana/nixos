@@ -1,9 +1,10 @@
 print("permissions.lua")
 
-hl.permission("/usr/(bin|local/bin)/hyprshot", "screencopy", "allow")
+hl.permission({ binary = "${lib.getExe pkgs.grim}", type = "screencopy", mode = "allow" })
 
 hl.config({
     ecosystem = {
         enforce_permissions = true,
     },
 })
+

@@ -1,4 +1,20 @@
-/* style.css, hardlinked to ~/.config/waybar */
+/* style.css, symlinked to ~/.config/waybar */
+
+/* catppuccin mocha */
+@define-color mantle   #181825;
+@define-color crust    #11111b;
+@define-color surface0 #313244;
+@define-color surface1 #45475a;
+@define-color text     #cdd6f4;
+@define-color subtext0 #a6adc8;
+@define-color blue     #89b4fa;
+@define-color teal     #94e2d5;
+@define-color green    #a6e3a1;
+@define-color yellow   #f9e2af;
+@define-color peach    #fab387;
+@define-color red      #f38ba8;
+@define-color mauve    #cba6f7;
+@define-color sapphire #74c7ec;
 
 * {
   font-family: "JetBrainsMono Nerd Font", "JetBrains Mono", monospace;
@@ -11,35 +27,313 @@
 
 window#waybar {
   background: transparent;
-  color: #cdd6f4;
+  color: @text;
 }
 
 window#waybar > box {
-  background: #181825;
-  border: 1px solid #313244;
+  background: @mantle;
+  border: 1px solid @surface0;
   border-radius: 10px;
-  padding: 0 5px;
+  padding: 0 4px;
+  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.35);
 }
+
+/* ============ workspaces (accent: blue) ============ */
 
 #workspaces {
-  background: #181825;
-  border: 1px solid #313244;
-  border-radius: 10px;
-  padding: 0 5px;
+  background: @crust;
+  border: 1px solid @surface0;
+  border-radius: 9px;
+  padding: 0 3px;
+  margin: 4px 2px;
 }
 
-#workspaces button {
-  background: #181825;
-  border-radius: 10px;
-  transition: 0.3s;
+#custom-workspace-1,
+#custom-workspace-2,
+#custom-workspace-3,
+#custom-workspace-4 {
+  padding: 1px 9px;
+  margin: 3px 1px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  color: @subtext0;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-#workspaces button:not(.active):hover {
-  background: white;
-  color: black;
+#custom-workspace-1:not(.active):hover,
+#custom-workspace-2:not(.active):hover,
+#custom-workspace-3:not(.active):hover,
+#custom-workspace-4:not(.active):hover {
+  border: 1px solid @surface1;
+  color: @text;
 }
 
-#workspaces button.active {
-  background-color: white;
-  color: black;
+#custom-workspace-1:active,
+#custom-workspace-2:active,
+#custom-workspace-3:active,
+#custom-workspace-4:active {
+  background-color: @surface1;
+}
+
+#custom-workspace-1.active,
+#custom-workspace-2.active,
+#custom-workspace-3.active,
+#custom-workspace-4.active {
+  background-color: alpha(@blue, 0.15);
+  border: 1px solid @blue;
+  color: @blue;
+}
+
+/* ============ audio (accent: mauve) ============ */
+
+#pulseaudio\#speaker,
+#pulseaudio\#microphone {
+  padding: 1px 9px;
+  margin: 4px 1px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#pulseaudio\#speaker:hover,
+#pulseaudio\#microphone:hover {
+  background-color: alpha(@mauve, 0.1);
+  border: 1px solid @mauve;
+  color: @mauve;
+}
+
+#pulseaudio\#speaker:active,
+#pulseaudio\#microphone:active {
+  background-color: alpha(@mauve, 0.25);
+  border: 1px solid @mauve;
+}
+
+/* ============ connectivity (accent: teal) ============ */
+
+#bluetooth,
+#network {
+  padding: 1px 9px;
+  margin: 4px 1px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#bluetooth:hover,
+#network:hover {
+  background-color: alpha(@teal, 0.1);
+  border: 1px solid @teal;
+  color: @teal;
+}
+
+#bluetooth:active,
+#network:active {
+  background-color: alpha(@teal, 0.25);
+  border: 1px solid @teal;
+}
+
+/* ============ fan menu trigger (accent: yellow) ============ */
+
+#custom-fan-menu {
+  padding: 1px 9px;
+  margin: 4px 1px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#custom-fan-menu:hover {
+  background-color: alpha(@yellow, 0.1);
+  border: 1px solid @yellow;
+  color: @yellow;
+}
+
+#custom-fan-menu:active {
+  background-color: alpha(@yellow, 0.25);
+  border: 1px solid @yellow;
+}
+
+/* ============ power menu trigger (accent: peach) ============ */
+
+#custom-power-menu {
+  padding: 1px 9px;
+  margin: 4px 1px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#custom-power-menu:hover {
+  background-color: alpha(@peach, 0.1);
+  border: 1px solid @peach;
+  color: @peach;
+}
+
+#custom-power-menu:active {
+  background-color: alpha(@peach, 0.25);
+  border: 1px solid @peach;
+}
+
+/* ============ popup dropdown menus (fan / power) ============ */
+
+menu {
+  background-color: @mantle;
+  border: 1px solid @surface0;
+  border-radius: 8px;
+  padding: 4px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+}
+
+menu menuitem {
+  padding: 5px 10px;
+  border-radius: 6px;
+  color: @text;
+  transition: all 0.1s ease;
+}
+
+menu menuitem:hover {
+  background-color: alpha(@blue, 0.15);
+  color: @blue;
+}
+
+menu menuitem:active {
+  background-color: alpha(@blue, 0.3);
+}
+
+/* ============ now playing (accent: green) ============ */
+
+#mpris {
+  padding: 1px 10px;
+  margin: 4px 1px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: @subtext0;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#mpris.playing {
+  color: @green;
+}
+
+#mpris.paused {
+  color: @subtext0;
+}
+
+#mpris:hover {
+  border: 1px solid @green;
+  color: @green;
+}
+
+#mpris:active {
+  background-color: alpha(@green, 0.2);
+}
+
+/* ============ right side: idle inhibitor, backlight, stats, tray ============ */
+
+#idle_inhibitor,
+#backlight {
+  padding: 1px 9px;
+  margin: 4px 1px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#idle_inhibitor:hover,
+#backlight:hover {
+  background-color: alpha(@yellow, 0.1);
+  border: 1px solid @yellow;
+  color: @yellow;
+}
+
+#idle_inhibitor:active,
+#backlight:active {
+  background-color: alpha(@yellow, 0.25);
+}
+
+#idle_inhibitor.activated {
+  color: @green;
+  border: 1px solid @green;
+  background-color: alpha(@green, 0.12);
+}
+
+#stats {
+  background: @crust;
+  border: 1px solid @surface0;
+  border-radius: 9px;
+  padding: 0 6px;
+  margin: 4px 1px;
+}
+
+#cpu,
+#memory,
+#temperature {
+  padding: 1px 7px;
+  margin: 3px 1px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  color: @sapphire;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#cpu:hover,
+#memory:hover,
+#temperature:hover {
+  background-color: alpha(@sapphire, 0.12);
+  border: 1px solid @sapphire;
+}
+
+#temperature.critical {
+  color: @red;
+  animation: battery-critical-blink 1.4s ease-in-out infinite;
+}
+
+#battery {
+  padding: 1px 10px;
+  margin: 4px 1px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: @green;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#battery.warning {
+  color: @yellow;
+}
+
+#battery.critical {
+  color: @red;
+  animation: battery-critical-blink 1.4s ease-in-out infinite;
+}
+
+#battery.charging {
+  color: @teal;
+}
+
+@keyframes battery-critical-blink {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+#tray {
+  padding: 0 8px;
+  margin: 4px 1px;
+}
+
+#tray > widget {
+  padding: 0 3px;
+}
+
+/* ============ clock ============ */
+
+#clock {
+  padding: 1px 12px;
+  color: @text;
 }
