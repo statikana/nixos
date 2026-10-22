@@ -47,6 +47,7 @@ in
 
         (python3.withPackages (
             ps: with ps; [
+                pip
                 requests
                 numpy
                 pandas
@@ -54,6 +55,7 @@ in
                 openmpi
                 pygame-ce
                 kconfiglib
+                ucimlrepo
             ]
         ))
 
@@ -99,8 +101,16 @@ in
         jq # json
 
         ripgrep
+        socat # workspace-listener.sh reads Hyprland's event socket
         tor
-        
+        p7zip
+        parted
+        uefitool
+        ifrextractor-rs
+        file
+        busybox
+
+
         powertop
         dmidecode
 

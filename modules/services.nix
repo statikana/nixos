@@ -38,12 +38,22 @@
         tlp = {
             enable = true;
             settings = {
-                START_CHARGE_THRESH_BAT0 = 85;
+                START_CHARGE_THRESH_BAT0 = 75;
                 STOP_CHARGE_THRESH_BAT0 = 85;
 
                 # cap power/thermals on battery only; AC keeps full turbo/115W
                 CPU_BOOST_ON_BAT = 0;
                 PLATFORM_PROFILE_ON_BAT = "low-power";
+                CPU_ENERGY_PERF_POLICY_ON_BAT = "power";
+                PCIE_ASPM_ON_BAT = "powersupersave";
+
+                # TLP's own default (6000) overrides whatever's in sysctl.d at
+                # every TLP (re)apply, so set it here instead of via
+                # boot.kernel.sysctl -- 15s dirty-page writeback instead of the
+                # default's 60s/5s split lets the NVMe batch writes and idle
+                # longer without introducing much data-loss-on-crash risk
+                DIRTY_WRITEBACK_AC = 1500;
+                DIRTY_WRITEBACK_BAT = 1500;
             };
         };
         thinkfan = {

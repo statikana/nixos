@@ -14,6 +14,7 @@
 
     "modules-left": [
         "group/workspaces",
+        "custom/compress-workspaces",
         "pulseaudio#speaker",
         "pulseaudio#microphone",
         "bluetooth",
@@ -46,9 +47,16 @@
         ]
     },
 
+    // "interval": "once" + "signal": 8 -- workspace-listener.sh (started by
+    // Hyprland on login) watches Hyprland's event socket and sends SIGRTMIN+8
+    // to waybar only when the active workspace actually changes, so these no
+    // longer poll on a 0.3s timer (that was the single biggest battery drain
+    // in this config: ~27 process forks/sec, enough to keep the CPU out of
+    // deep idle continuously)
     "custom/workspace-1": {
         "min-length": 1,
-        "interval": 0.3,
+        "interval": "once",
+        "signal": 8,
         "exec": "/home/ryan/nixos/home-config/ryan/scripts/workspace/workspace-button-status.sh 1",
         "return-type": "json",
         "format": "{text}",
@@ -58,7 +66,8 @@
 
     "custom/workspace-2": {
         "min-length": 1,
-        "interval": 0.3,
+        "interval": "once",
+        "signal": 8,
         "exec": "/home/ryan/nixos/home-config/ryan/scripts/workspace/workspace-button-status.sh 2",
         "return-type": "json",
         "format": "{text}",
@@ -68,7 +77,8 @@
 
     "custom/workspace-3": {
         "min-length": 1,
-        "interval": 0.3,
+        "interval": "once",
+        "signal": 8,
         "exec": "/home/ryan/nixos/home-config/ryan/scripts/workspace/workspace-button-status.sh 3",
         "return-type": "json",
         "format": "{text}",
@@ -78,7 +88,8 @@
 
     "custom/workspace-4": {
         "min-length": 1,
-        "interval": 0.3,
+        "interval": "once",
+        "signal": 8,
         "exec": "/home/ryan/nixos/home-config/ryan/scripts/workspace/workspace-button-status.sh 4",
         "return-type": "json",
         "format": "{text}",
@@ -86,15 +97,25 @@
         "on-click": "/home/ryan/nixos/home-config/ryan/scripts/workspace/workspace-switch.sh 4"
     },
 
-    "hyprland/window": {
-        "format": "{class} | {title}",
-        "max-length": 80,
-        "separate-outputs": true,
-        "rewrite": {
-            "(.*) - Mozilla Firefox": "$1",
-            "(.*) — Mozilla Firefox": "$1"
-        }
+    // packs occupied workspaces down to 1, 2, 3... closing gaps left by
+    // empty ones (windows on 2 and 4 become 1 and 2)
+    "custom/compress-workspaces": {
+        "min-length": 1,
+        "tooltip": true,
+        "tooltip-format": "Compress workspaces",
+        "format": "",
+        "on-click": "/home/ryan/nixos/home-config/ryan/scripts/workspace/workspace-compress.sh"
     },
+
+    // "hyprland/window": {
+    //     "format": "{class} | {title}",
+    //     "max-length": 80,
+    //     "separate-outputs": true,
+    //     "rewrite": {
+    //         "(.*) - Mozilla Firefox": "$1",
+    //         "(.*) — Mozilla Firefox": "$1"
+    //     }
+    // },
 
 
 
@@ -115,7 +136,7 @@
         "default": ["󰕿", "󰖀", "󰕾"]
         },
         "scroll-step": 1,
-        "on-click": "pavucontrol",
+        "on-click": "wezterm start --class wiremix -- wiremix",
         "on-click-right": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
         "tooltip-format": "{desc}\nVolume: {volume}%"
     },
@@ -125,7 +146,7 @@
         "format": "{format_source}",
         "format-source": " ready",
         "format-source-muted": "  muted",
-        "on-click": "pavucontrol",
+        "on-click": "wezterm start --class wiremix -- wiremix",
         "on-click-right": "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle",
         "tooltip": true
     },
@@ -133,6 +154,7 @@
     "bluetooth": {
         "controller": "tpacpi_bluetooth_sw",  // thinkpad wifi controller ( rfkill )
         "min-length": 3,
+        "interval": 2,
         "format": "󰂯 {status}",
         "format-disabled": "󰂲 off",
         "format-connected": "󰂱  {num_connections}",
@@ -140,19 +162,12 @@
         "tooltip-format": "Controller: {controller_alias} ({controller_address})\nConnected devices: {num_connections}\n{device_enumerate}",
         "tooltip-format-enumerate-connected": "  · {device_alias} ({device_address})",
         "tooltip-format-enumerate-connected-battery": "  · {device_alias} ({device_address}) — {device_battery_percentage}%",
-        "on-click": "blueman-manager",
+        "on-click": "wezterm start --class bluetuith -- bluetuith",
         "on-click-right": "rfkill toggle bluetooth"
     },
 
 
     "network": {
-        // wlp0s20f3
-        // wl p0 s20 f3
-        //
-        // wl  = wlan
-        // p0  = pci bus 0
-        // s20 = slot 20 (on pci bus slot 0)
-        // f3  = function 3? maybe index of <BROADCAST,MULTICAST,UP,LOWER_UP> (ip link list)
         "interval": 3,
         "min-length": 10,
         "format-wifi": "󰤨  {essid}",
@@ -162,13 +177,16 @@
         "tooltip-format-wifi": "{essid} · {signalStrength}% signal ({signaldBm} dBm)\nFreq: {frequency} GHz\n\nIP: {ipaddr}/{cidr}\nGateway: {gwaddr}\nNetmask: {netmask}\nMAC (BSSID): {bssid}\n\n↓ {bandwidthDownBits}   ↑ {bandwidthUpBits}",
         "tooltip-format-ethernet": "{ifname}\nIP: {ipaddr}/{cidr}\n↓ {bandwidthDownBits}   ↑ {bandwidthUpBits}",
         "tooltip-format-disconnected": "Disconncted",
-        "on-click": "nm-connection-editor",
+        // nmtui run bare had nothing to draw into -- waybar has no TTY, so the
+        // previous on-click was silently going nowhere. Open it in a wezterm
+        // window instead, same as the bluetooth/audio TUIs below.
+        "on-click": "wezterm start --class nmtui -- nmtui",
         "on-click-right": "rfkill toggle wifi"
     },
 
     "custom/fan-menu": {
         "min-length": 6,
-        "interval": 1,
+        "interval": 10,
         "exec": "/home/ryan/nixos/home-config/ryan/scripts/fan/fan-status.sh",
         "return-type": "json",
         "format": "{text}",

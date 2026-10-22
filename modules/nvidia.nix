@@ -75,7 +75,10 @@ in
         # Enable the Nvidia settings menu,
         # accessible via `nvidia-settings`.
         nvidiaSettings = true;
-        nvidiaPersistenced = true;
+        # persistenced keeps the GPU initialized, which blocks fine-grained
+        # runtime D3cold suspend above -- fine for headless/compute, wrong
+        # for a laptop dGPU you want fully powered off when idle on battery
+        nvidiaPersistenced = false;
         modesetting.enable = true;
         # Optionally, you may need to select the appropriate driver version for your specific GPU.
         # package = config.boot.kernelPackages.nvidiaPackages.stable; # old stable package
