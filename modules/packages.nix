@@ -21,6 +21,14 @@ let
 in
 
 {
+    nixpkgs.overlays = [
+        (final: prev: {
+            qgroundcontrol = prev.qgroundcontrol.overrideAttrs (old: {
+                NIX_CFLAGS_COMPILE = "-Wno-error";
+            });
+        })
+    ];
+
     environment.systemPackages = with pkgs; [
         # System
         hyprland
@@ -55,7 +63,6 @@ in
                 openmpi
                 pygame-ce
                 kconfiglib
-                ucimlrepo
             ]
         ))
 

@@ -4,17 +4,14 @@
     lib,
     ...
 }:
-let
-    home-manager = builtins.fetchTarball "https://github.com/nix-community/home-manager/archive/master.tar.gz";
-in
 {
     imports = [
-        "/home/ryan/nixos/modules"
-        "${home-manager}/nixos"
-        "/home/ryan/nixos/hardware-configuration.nix"
+        ./modules
+        ./hardware-configuration.nix
     ];
 
-    home-manager.users."ryan" = import "/home/ryan/nixos/home-config/ryan";
+    home-manager.users."ryan" = import ./home-config/ryan;
+    home-manager.useGlobalPkgs = true;
 
     nixpkgs.config.allowUnfree = true;
 

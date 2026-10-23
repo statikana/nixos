@@ -26,7 +26,6 @@
         impala
         bluetuith # TUI bluetooth manager, replaces blueman-manager on waybar left-click
         wiremix # TUI pipewire mixer, replaces pavucontrol on waybar left-click
-
         nerd-fonts.jetbrains-mono
     ];
 }
