@@ -5,7 +5,7 @@ let
     # unencrypted bootstrap fetch of public-resolvers.md first.
     dnscryptBaseToml = ''
         listen_addresses = ["127.0.0.1:53", "[::1]:53"]
-        server_names = ["cloudflare"]
+        server_names = ["cloudflare", "cloudflare-backup"]
         ipv4_servers = true
         ipv6_servers = false
         dnscrypt_servers = true
@@ -23,9 +23,15 @@ let
         cache_neg_max_ttl = 600
     '';
 
+    # Unpinned DoH stamps for 1.1.1.1 and 1.0.0.1 (dns.cloudflare.com/dns-query)
+    # so dnscrypt-proxy validates TLS against the system CA bundle instead of failing
+    # on expired DigiCert certificate hashes.
     dnscryptCloudflareStatic = ''
         [static.cloudflare]
-        stamp = "sdns://AgcAAAAAAAAABzEuMS4xLjGgENk8mGSlIfMGXMOlIlCcKvq7AVgcrZxtjon911-ep0cg63Ul-I8NlFj4GplQGb_TTLiczclX57DvMV8Q-JdjgRgSZG5zLmNsb3VkZmxhcmUuY29tCi9kbnMtcXVlcnk"
+        stamp = "sdns://AgcAAAAAAAAABzEuMS4xLjEAEmRucy5jbG91ZGZsYXJlLmNvbQovZG5zLXF1ZXJ5"
+
+        [static.cloudflare-backup]
+        stamp = "sdns://AgcAAAAAAAAABzEuMC4wLjEAEmRucy5jbG91ZGZsYXJlLmNvbQovZG5zLXF1ZXJ5"
     '';
 
     dnscryptDirectConf = pkgs.writeText "dnscrypt-proxy-direct.toml" ''
@@ -61,26 +67,30 @@ let
         ${pkgs.iptables}/bin/ip6tables -t filter -X TOR_FILTER6 2>/dev/null || true
     '';
 
-    # Helper script to enable Tor transparent TCP proxy (TransPort 9040) + block UDP/IPv6 leaks
+    # Helper script to enable Tor transparent TCP proxy (TransPort 9040) + block UDP/IPv6/keepalive leaks
     startTorTransProxy = pkgs.writeShellScript "start-tor-transproxy" ''
         ${stopTorTransProxy}
 
-        # 1. NAT chain: redirect outbound TCP SYN packets to Tor TransPort (127.0.0.1:9040)
+        # 1. NAT chain: DNAT all new non-LAN outbound TCP connections to Tor TransPort (127.0.0.1:9040)
         ${pkgs.iptables}/bin/iptables -t nat -N TOR_PROXY
         ${pkgs.iptables}/bin/iptables -t nat -A TOR_PROXY -m owner --uid-owner tor -j RETURN
         for net in 127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16 100.64.0.0/10 169.254.0.0/16 224.0.0.0/4 240.0.0.0/4; do
             ${pkgs.iptables}/bin/iptables -t nat -A TOR_PROXY -d "$net" -j RETURN
         done
-        ${pkgs.iptables}/bin/iptables -t nat -A TOR_PROXY -p tcp --syn -j REDIRECT --to-ports 9040
+        ${pkgs.iptables}/bin/iptables -t nat -A TOR_PROXY -p tcp -m tcp --syn -j DNAT --to-destination 127.0.0.1:9040
         ${pkgs.iptables}/bin/iptables -t nat -A OUTPUT -p tcp -j TOR_PROXY
 
-        # 2. Filter chain: reject non-LAN outbound UDP (e.g. QUIC UDP:443) so browsers
-        # immediately fall back to TCP:443 through Tor instead of leaking real IP
+        # 2. Filter chain:
+        #    - Allow traffic owned by tor and traffic destined to 127.0.0.0/8 (including DNAT'd 127.0.0.1:9040) or LAN
+        #    - Reject pre-existing ESTABLISHED direct TCP sockets with TCP RST so browsers immediately
+        #      open a fresh connection through Tor TransPort 9040 (changing your IP without tab reloads)
+        #    - Reject non-LAN outbound UDP (e.g. QUIC UDP:443) so browsers fall back to TCP over Tor
         ${pkgs.iptables}/bin/iptables -t filter -N TOR_FILTER
         ${pkgs.iptables}/bin/iptables -t filter -A TOR_FILTER -m owner --uid-owner tor -j RETURN
         for net in 127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16 100.64.0.0/10 169.254.0.0/16 224.0.0.0/4 255.255.255.255/32; do
             ${pkgs.iptables}/bin/iptables -t filter -A TOR_FILTER -d "$net" -j RETURN
         done
+        ${pkgs.iptables}/bin/iptables -t filter -A TOR_FILTER -p tcp -j REJECT --reject-with tcp-reset
         ${pkgs.iptables}/bin/iptables -t filter -A TOR_FILTER -p udp -j REJECT --reject-with icmp-port-unreachable
         ${pkgs.iptables}/bin/iptables -t filter -A OUTPUT -j TOR_FILTER
 
@@ -90,6 +100,7 @@ let
         ${pkgs.iptables}/bin/ip6tables -t filter -A TOR_FILTER6 -m owner --uid-owner tor -j RETURN
         ${pkgs.iptables}/bin/ip6tables -t filter -A TOR_FILTER6 -d ::1/128 -j RETURN
         ${pkgs.iptables}/bin/ip6tables -t filter -A TOR_FILTER6 -d fe80::/10 -j RETURN
+        ${pkgs.iptables}/bin/ip6tables -t filter -A TOR_FILTER6 -p tcp -j REJECT --reject-with tcp-reset
         ${pkgs.iptables}/bin/ip6tables -t filter -A TOR_FILTER6 -j REJECT --reject-with icmp6-adm-prohibited
         ${pkgs.iptables}/bin/ip6tables -t filter -A OUTPUT -j TOR_FILTER6
     '';
@@ -216,7 +227,10 @@ in
             ];
         };
 
-        udev.extraRules = ''ACTION=="add|bind", SUBSYSTEM=="platform", DRIVER=="thinkpad_acpi", RUN+="${pkgs.coreutils}/bin/chgrp fan_ctl /proc/acpi/ibm/fan", RUN+="${pkgs.coreutils}/bin/chmod 0664 /proc/acpi/ibm/fan"'';
+        udev.extraRules = ''
+            ACTION=="add|bind", SUBSYSTEM=="platform", DRIVER=="thinkpad_acpi", RUN+="${pkgs.coreutils}/bin/chgrp fan_ctl /proc/acpi/ibm/fan", RUN+="${pkgs.coreutils}/bin/chmod 0664 /proc/acpi/ibm/fan"
+            SUBSYSTEM=="hidraw", ATTRS{idVendor}=="1915", ATTRS{idProduct}=="520a", MODE="0660", GROUP="input"
+        '';
 
         undervolt = {  # undervolting / RAPL power limits for intel cpus
             enable = true;
@@ -344,7 +358,15 @@ in
                 Type = "oneshot";
                 ExecStart = pkgs.writeShellScript "dns-proxy-tor" ''
                     /run/current-system/sw/bin/systemctl stop dnscrypt-proxy-direct.service || true
-                    /run/current-system/sw/bin/systemctl start tor.service dnscrypt-proxy-tor.service
+                    /run/current-system/sw/bin/systemctl start tor.service
+                    # Wait for Tor to bind SOCKS5 (127.0.0.1:9050 = 0100007F:235A) before starting dnscrypt-proxy-tor
+                    for _ in $(seq 1 50); do
+                        if grep -q "0100007F:235A" /proc/net/tcp 2>/dev/null; then
+                            break
+                        fi
+                        sleep 0.1
+                    done
+                    /run/current-system/sw/bin/systemctl start dnscrypt-proxy-tor.service
                     printf "nameserver 127.0.0.1\n" | /run/current-system/sw/bin/resolvconf -a lo.dnscrypt -x
                     ${startTorTransProxy}
                     echo "tor" > /run/dns-proxy-mode

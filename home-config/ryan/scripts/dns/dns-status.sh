@@ -7,6 +7,11 @@
 #             Cloudflare DoH routed over Tor SOCKS5 (127.0.0.1:9050)
 
 export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+rm -f /tmp/dns-debug.log /tmp/dns-debug2.log /tmp/dns-debug3.log /tmp/test-dnscrypt.toml 2>/dev/null
+
+
+
+
 
 # Detect live service status
 tor_active=0

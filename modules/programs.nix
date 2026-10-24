@@ -1,4 +1,4 @@
-{ ... }: {
+{ pkgs, ... }: {
     programs = {
         # https://search.nixos.org/options?channel=26.05&query=programs.uwsm&type=options#show=option%253Aprograms.uwsm.waylandCompositors
         # uwsm = {
@@ -10,7 +10,29 @@
         #     };
         # }; # dont do this! handled already
 
-        nix-ld.enable = true;
+        nix-ld = {
+            enable = true;
+            libraries = with pkgs; [
+                gtk3
+                glib
+                pango
+                harfbuzz
+                at-spi2-atk
+                cairo
+                gdk-pixbuf
+                libepoxy
+                fontconfig
+                freetype
+                dbus
+                systemd
+                libusb1
+                udev
+                zlib
+                openssl
+                curl
+                stdenv.cc.cc
+            ];
+        };
 
         firefox = {
             enable = true;
