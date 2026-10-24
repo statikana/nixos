@@ -3,3 +3,4 @@
 echo "saver" | tee $XDG_RUNTIME_DIR/power-mode >/dev/null
 echo "low-power" | tee /sys/firmware/acpi/platform_profile >/dev/null
 sudo systemctl start undervolt-saver.service
+pkill -RTMIN+9 waybar

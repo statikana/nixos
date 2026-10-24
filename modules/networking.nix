@@ -1,7 +1,9 @@
 { ... }: {
     networking.hostName = "ryan-nixos";
 
-    networking.wireless.enable = true; # Enables wireless support via wpa_supplicant.
+    # NetworkManager manages Wi-Fi via wpa_supplicant; enabling networking.wireless
+    # alongside it starts a duplicate standalone wpa_supplicant.service
+    # networking.wireless.enable = true;
 
     # networking.proxy.default = "http://user:password@proxy:port/";
     # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";

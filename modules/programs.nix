@@ -12,7 +12,15 @@
 
         nix-ld.enable = true;
 
-        firefox.enable = true;
+        firefox = {
+            enable = true;
+            preferences = {
+                "media.ffmpeg.vaapi.enabled" = true;
+                "media.hardware-video-decoding.force-enabled" = true;
+                "media.rdd-ffmpeg.enabled" = true;
+                "gfx.webrender.all" = true;
+            };
+        };
 
         steam.enable = true;
 

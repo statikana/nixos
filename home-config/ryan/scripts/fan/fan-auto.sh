@@ -3,3 +3,4 @@
 sudo /run/current-system/sw/bin/systemctl start thinkfan.service # ensure on
 echo "auto" | tee $XDG_RUNTIME_DIR/fan-mode >/dev/null
 echo "level auto" | tee /proc/acpi/ibm/fan >/dev/null
+pkill -RTMIN+10 waybar

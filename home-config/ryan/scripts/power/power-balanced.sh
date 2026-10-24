@@ -3,3 +3,4 @@
 echo "balanced" | tee $XDG_RUNTIME_DIR/power-mode >/dev/null
 echo "balanced" | tee /sys/firmware/acpi/platform_profile >/dev/null
 sudo systemctl start undervolt-balanced.service
+pkill -RTMIN+9 waybar

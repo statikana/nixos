@@ -115,7 +115,17 @@ in
         uefitool
         ifrextractor-rs
         file
-        busybox
+        pciutils
+        usbutils
+        psmisc
+        libva-utils
+        intel-gpu-tools
+        nvme-cli
+        acpi
+        config.boot.kernelPackages.cpupower
+        config.boot.kernelPackages.turbostat
+
+        antigravity-cli
 
 
         powertop

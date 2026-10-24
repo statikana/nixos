@@ -1,20 +1,23 @@
 /* style.css, symlinked to ~/.config/waybar */
 
-/* catppuccin mocha */
-@define-color mantle   #181825;
+/* ============ Catppuccin Mocha Palette ============ */
 @define-color crust    #11111b;
+@define-color mantle   #181825;
+@define-color base     #1e1e2e;
 @define-color surface0 #313244;
 @define-color surface1 #45475a;
-@define-color text     #cdd6f4;
+@define-color overlay0 #6c7086;
 @define-color subtext0 #a6adc8;
+@define-color text     #cdd6f4;
+
 @define-color blue     #89b4fa;
+@define-color sapphire #74c7ec;
 @define-color teal     #94e2d5;
 @define-color green    #a6e3a1;
 @define-color yellow   #f9e2af;
 @define-color peach    #fab387;
-@define-color red      #f38ba8;
 @define-color mauve    #cba6f7;
-@define-color sapphire #74c7ec;
+@define-color red      #f38ba8;
 
 * {
   font-family: "JetBrainsMono Nerd Font", "JetBrains Mono", monospace;
@@ -33,14 +36,19 @@ window#waybar {
 window#waybar > box {
   background: @mantle;
   border: 1px solid @surface0;
-  border-radius: 10px;
-  padding: 0 4px;
+  border-radius: 11px;
+  padding: 0 5px;
   box-shadow: 0 2px 14px rgba(0, 0, 0, 0.35);
 }
 
-/* ============ workspaces (accent: blue) ============ */
-
-#workspaces {
+/* ============ Shared Island Containers ============ */
+#workspaces,
+#media,
+#connectivity,
+#clock,
+#display,
+#stats,
+#power {
   background: @crust;
   border: 1px solid @surface0;
   border-radius: 9px;
@@ -48,159 +56,22 @@ window#waybar > box {
   margin: 4px 2px;
 }
 
-#custom-workspace-1,
-#custom-workspace-2,
-#custom-workspace-3,
-#custom-workspace-4 {
-  padding: 1px 9px;
-  margin: 3px 1px;
-  border: 1px solid transparent;
-  border-radius: 7px;
-  color: @subtext0;
-  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-#custom-workspace-1:not(.active):hover,
-#custom-workspace-2:not(.active):hover,
-#custom-workspace-3:not(.active):hover,
-#custom-workspace-4:not(.active):hover {
+/* ============ Tooltips & Dropdown Menus ============ */
+tooltip {
+  background-color: @mantle;
   border: 1px solid @surface1;
+  border-radius: 9px;
+}
+
+tooltip label {
   color: @text;
+  padding: 6px 8px;
 }
-
-#custom-workspace-1:active,
-#custom-workspace-2:active,
-#custom-workspace-3:active,
-#custom-workspace-4:active {
-  background-color: @surface1;
-}
-
-#custom-workspace-1.active,
-#custom-workspace-2.active,
-#custom-workspace-3.active,
-#custom-workspace-4.active {
-  background-color: alpha(@blue, 0.15);
-  border: 1px solid @blue;
-  color: @blue;
-}
-
-/* ============ audio (accent: mauve) ============ */
-
-#pulseaudio\#speaker,
-#pulseaudio\#microphone {
-  padding: 1px 9px;
-  margin: 4px 1px;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-#pulseaudio\#speaker:hover,
-#pulseaudio\#microphone:hover {
-  background-color: alpha(@mauve, 0.1);
-  border: 1px solid @mauve;
-  color: @mauve;
-}
-
-#pulseaudio\#speaker:active,
-#pulseaudio\#microphone:active {
-  background-color: alpha(@mauve, 0.25);
-  border: 1px solid @mauve;
-}
-
-/* ============ connectivity (accent: teal) ============ */
-
-#bluetooth,
-#network {
-  padding: 1px 9px;
-  margin: 4px 1px;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-#bluetooth:hover,
-#network:hover {
-  background-color: alpha(@teal, 0.1);
-  border: 1px solid @teal;
-  color: @teal;
-}
-
-#bluetooth:active,
-#network:active {
-  background-color: alpha(@teal, 0.25);
-  border: 1px solid @teal;
-}
-
-/* ============ compress workspaces trigger (accent: green) ============ */
-
-#custom-compress-workspaces {
-  padding: 1px 9px;
-  margin: 4px 1px;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-#custom-compress-workspaces:hover {
-  background-color: alpha(@green, 0.1);
-  border: 1px solid @green;
-  color: @green;
-}
-
-#custom-compress-workspaces:active {
-  background-color: alpha(@green, 0.25);
-  border: 1px solid @green;
-}
-
-/* ============ fan menu trigger (accent: yellow) ============ */
-
-#custom-fan-menu {
-  padding: 1px 9px;
-  margin: 4px 1px;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-#custom-fan-menu:hover {
-  background-color: alpha(@yellow, 0.1);
-  border: 1px solid @yellow;
-  color: @yellow;
-}
-
-#custom-fan-menu:active {
-  background-color: alpha(@yellow, 0.25);
-  border: 1px solid @yellow;
-}
-
-/* ============ power menu trigger (accent: peach) ============ */
-
-#custom-power-menu {
-  padding: 1px 9px;
-  margin: 4px 1px;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-#custom-power-menu:hover {
-  background-color: alpha(@peach, 0.1);
-  border: 1px solid @peach;
-  color: @peach;
-}
-
-#custom-power-menu:active {
-  background-color: alpha(@peach, 0.25);
-  border: 1px solid @peach;
-}
-
-/* ============ popup dropdown menus (fan / power) ============ */
 
 menu {
   background-color: @mantle;
-  border: 1px solid @surface0;
-  border-radius: 8px;
+  border: 1px solid @surface1;
+  border-radius: 9px;
   padding: 4px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
 }
@@ -221,127 +92,335 @@ menu menuitem:active {
   background-color: alpha(@blue, 0.3);
 }
 
-/* ============ now playing (accent: green) ============ */
-
-#mpris {
-  padding: 1px 10px;
-  margin: 4px 1px;
+/* ============ 1. Workspaces Island (Accent: Blue) ============ */
+#custom-workspace-1,
+#custom-workspace-2,
+#custom-workspace-3,
+#custom-workspace-4,
+#custom-compress-workspaces {
+  padding: 1px 8px;
+  margin: 3px 1px;
   border: 1px solid transparent;
-  border-radius: 8px;
+  border-radius: 7px;
   color: @subtext0;
   transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-#mpris.playing {
-  color: @green;
+#custom-workspace-1:not(.active):hover,
+#custom-workspace-2:not(.active):hover,
+#custom-workspace-3:not(.active):hover,
+#custom-workspace-4:not(.active):hover,
+#custom-compress-workspaces:hover {
+  background-color: alpha(@blue, 0.1);
+  border: 1px solid alpha(@blue, 0.4);
+  color: @blue;
 }
 
+#custom-workspace-1.active,
+#custom-workspace-2.active,
+#custom-workspace-3.active,
+#custom-workspace-4.active {
+  background-color: alpha(@blue, 0.16);
+  border: 1px solid @blue;
+  color: @blue;
+  font-weight: 600;
+}
+
+#custom-compress-workspaces:active {
+  background-color: alpha(@blue, 0.25);
+  border: 1px solid @blue;
+}
+
+/* ============ 2. Media & Audio Island (Accent: Mauve) ============ */
+#pulseaudio\#speaker,
+#pulseaudio\#microphone,
+#mpris {
+  padding: 1px 8px;
+  margin: 3px 1px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  color: @mauve;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#pulseaudio\#speaker.muted,
+#pulseaudio\#microphone.source-muted,
 #mpris.paused {
-  color: @subtext0;
+  color: @overlay0;
 }
 
+#pulseaudio\#speaker:hover,
+#pulseaudio\#microphone:hover,
 #mpris:hover {
-  border: 1px solid @green;
-  color: @green;
+  background-color: alpha(@mauve, 0.14);
+  border: 1px solid @mauve;
+  color: @mauve;
 }
 
+#pulseaudio\#speaker:active,
+#pulseaudio\#microphone:active,
 #mpris:active {
-  background-color: alpha(@green, 0.2);
+  background-color: alpha(@mauve, 0.25);
+  border: 1px solid @mauve;
 }
 
-/* ============ right side: idle inhibitor, backlight, stats, tray ============ */
+/* ============ 3. Connectivity Island (Accent: Teal) ============ */
+#network,
+#custom-dns-menu,
+#bluetooth {
+  padding: 1px 8px;
+  margin: 3px 1px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  color: @teal;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
 
+#network.disconnected,
+#network.disabled,
+#custom-dns-menu.off,
+#bluetooth.disabled,
+#bluetooth.off {
+  color: @overlay0;
+}
+
+#custom-dns-menu.direct {
+  background-color: alpha(@sapphire, 0.12);
+  border: 1px solid alpha(@sapphire, 0.35);
+  color: @sapphire;
+}
+
+#custom-dns-menu.tor {
+  background-color: alpha(@mauve, 0.14);
+  border: 1px solid alpha(@mauve, 0.4);
+  color: @mauve;
+}
+
+#bluetooth.connected {
+  background-color: alpha(@teal, 0.12);
+  border: 1px solid alpha(@teal, 0.35);
+  color: @teal;
+}
+
+#network:hover,
+#custom-dns-menu:hover,
+#bluetooth:hover {
+  background-color: alpha(@teal, 0.15);
+  border: 1px solid @teal;
+  color: @teal;
+}
+
+#custom-dns-menu.direct:hover {
+  background-color: alpha(@sapphire, 0.2);
+  border: 1px solid @sapphire;
+  color: @sapphire;
+}
+
+#custom-dns-menu.tor:hover {
+  background-color: alpha(@mauve, 0.22);
+  border: 1px solid @mauve;
+  color: @mauve;
+}
+
+#network:active,
+#custom-dns-menu:active,
+#bluetooth:active {
+  background-color: alpha(@teal, 0.25);
+  border: 1px solid @teal;
+}
+
+/* ============ 4. Center Clock Island (Accent: Text / Blue) ============ */
+#clock {
+  padding: 1px 12px;
+  color: @text;
+  font-weight: 600;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#clock:hover {
+  border: 1px solid @blue;
+  color: @blue;
+}
+
+/* ============ 5. Display Island (Accent: Yellow) ============ */
 #idle_inhibitor,
 #backlight {
-  padding: 1px 9px;
-  margin: 4px 1px;
+  padding: 1px 8px;
+  margin: 3px 1px;
   border: 1px solid transparent;
-  border-radius: 8px;
+  border-radius: 7px;
+  color: @yellow;
   transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-#idle_inhibitor:hover,
-#backlight:hover {
-  background-color: alpha(@yellow, 0.1);
+#idle_inhibitor.deactivated {
+  color: @overlay0;
+}
+
+#idle_inhibitor.activated {
+  background-color: alpha(@yellow, 0.15);
   border: 1px solid @yellow;
   color: @yellow;
 }
 
-#idle_inhibitor:active,
-#backlight:active {
-  background-color: alpha(@yellow, 0.25);
-}
-
-#idle_inhibitor.activated {
-  color: @green;
-  border: 1px solid @green;
-  background-color: alpha(@green, 0.12);
-}
-
-#stats {
-  background: @crust;
-  border: 1px solid @surface0;
-  border-radius: 9px;
-  padding: 0 6px;
-  margin: 4px 1px;
-}
-
-#cpu,
-#memory,
-#temperature {
-  padding: 1px 7px;
-  margin: 3px 1px;
-  border: 1px solid transparent;
-  border-radius: 7px;
-  color: @sapphire;
-  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-#cpu:hover,
-#memory:hover,
-#temperature:hover {
-  background-color: alpha(@sapphire, 0.12);
-  border: 1px solid @sapphire;
-}
-
-#temperature.critical {
-  color: @red;
-  animation: battery-critical-blink 1.4s ease-in-out infinite;
-}
-
-#battery {
-  padding: 1px 10px;
-  margin: 4px 1px;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  color: @green;
-  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-#battery.warning {
+#idle_inhibitor:hover,
+#backlight:hover {
+  background-color: alpha(@yellow, 0.15);
+  border: 1px solid @yellow;
   color: @yellow;
 }
 
-#battery.critical {
-  color: @red;
+/* ============ 6. Hardware & Thermals Island (Distinct Per-Tab Colors) ============ */
+#custom-cpu,
+#custom-memory,
+#custom-temperature,
+#custom-fan-menu {
+  padding: 1px 8px;
+  margin: 3px 1px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-#battery.charging {
+/* CPU: Sapphire */
+#custom-cpu {
+  color: @sapphire;
+}
+
+#custom-cpu:hover {
+  background-color: alpha(@sapphire, 0.14);
+  border: 1px solid @sapphire;
+  color: @sapphire;
+}
+
+/* Memory: Mauve */
+#custom-memory {
+  color: @mauve;
+}
+
+#custom-memory:hover {
+  background-color: alpha(@mauve, 0.14);
+  border: 1px solid @mauve;
+  color: @mauve;
+}
+
+/* Temperature: Peach */
+#custom-temperature {
+  color: @peach;
+}
+
+#custom-temperature:hover {
+  background-color: alpha(@peach, 0.14);
+  border: 1px solid @peach;
+  color: @peach;
+}
+
+/* Fan: Teal */
+#custom-fan-menu {
   color: @teal;
 }
 
-#tray {
-  padding: 0 8px;
-  margin: 4px 1px;
+#custom-fan-menu.quiet {
+  color: @blue;
 }
 
-#tray > widget {
-  padding: 0 3px;
+#custom-fan-menu.max {
+  color: @yellow;
 }
 
-/* ============ clock ============ */
+#custom-fan-menu:hover {
+  background-color: alpha(@teal, 0.14);
+  border: 1px solid @teal;
+  color: @teal;
+}
 
-#clock {
-  padding: 1px 12px;
-  color: @text;
+#custom-cpu.warning,
+#custom-memory.warning,
+#custom-temperature.warning {
+  color: @yellow;
+}
+
+#custom-cpu.critical,
+#custom-memory.critical,
+#custom-temperature.critical {
+  color: @red;
+  background-color: alpha(@red, 0.15);
+  border: 1px solid @red;
+}
+
+/* ============ 7. Power & Battery Island (Green=Saver/BAT, Sapphire=AC/Bal, Peach=Perf) ============ */
+#custom-power-menu,
+#custom-battery-changes,
+#battery {
+  padding: 1px 8px;
+  margin: 3px 1px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  color: @green;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Power profile states */
+#custom-power-menu.saver {
+  color: @green;
+}
+
+#custom-power-menu.balanced {
+  color: @sapphire;
+}
+
+#custom-power-menu.performance {
+  color: @peach;
+  background-color: alpha(@peach, 0.12);
+  border: 1px solid alpha(@peach, 0.4);
+}
+
+/* Battery / AC optimizations summary pill */
+#custom-battery-changes.battery {
+  color: @green;
+  background-color: alpha(@green, 0.12);
+  border: 1px solid alpha(@green, 0.35);
+}
+
+#custom-battery-changes.ac {
+  color: @sapphire;
+}
+
+/* Battery level states */
+#battery.charging,
+#battery.plugged {
+  color: @teal;
+}
+
+#battery.warning:not(.charging) {
+  color: @yellow;
+  background-color: alpha(@yellow, 0.12);
+  border: 1px solid alpha(@yellow, 0.4);
+}
+
+#battery.critical:not(.charging) {
+  color: @red;
+  background-color: alpha(@red, 0.16);
+  border: 1px solid @red;
+}
+
+#custom-power-menu:hover,
+#custom-battery-changes:hover,
+#battery:hover {
+  background-color: alpha(@green, 0.16);
+  border: 1px solid @green;
+  color: @green;
+}
+
+#custom-power-menu.balanced:hover,
+#custom-battery-changes.ac:hover {
+  background-color: alpha(@sapphire, 0.16);
+  border: 1px solid @sapphire;
+  color: @sapphire;
+}
+
+#custom-power-menu.performance:hover {
+  background-color: alpha(@peach, 0.2);
+  border: 1px solid @peach;
+  color: @peach;
 }

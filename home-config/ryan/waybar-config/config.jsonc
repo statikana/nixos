@@ -5,7 +5,7 @@
 {
     "layer": "top",
     "position": "top",
-    "height": 44,
+    "height": 42,
     "spacing": 4,
     "margin-top": 8,
     "margin-left": 10,
@@ -14,47 +14,31 @@
 
     "modules-left": [
         "group/workspaces",
-        "custom/compress-workspaces",
-        "pulseaudio#speaker",
-        "pulseaudio#microphone",
-        "bluetooth",
-        "network",
-        "custom/fan-menu",
-        "custom/power-menu",
-        "mpris"
+        "group/media",
+        "group/connectivity"
     ],
     "modules-center": [
         "clock"
     ],
     "modules-right": [
-        "idle_inhibitor",
-        "backlight",
+        "group/display",
         "group/stats",
-        "battery"
-        // "tray"
+        "group/power"
     ],
 
-    // this Hyprland fork dispatches via its Lua API (hl.dsp.*), which the compiled
-    // hyprland/workspaces module's built-in click handler doesn't speak -- so we
-    // drive workspace switching ourselves via workspace-switch.sh instead
+    // ============ LEFT: WORKSPACES ISLAND (accent: blue) ============
     "group/workspaces": {
         "orientation": "horizontal",
         "modules": [
             "custom/workspace-1",
             "custom/workspace-2",
             "custom/workspace-3",
-            "custom/workspace-4"
+            "custom/workspace-4",
+            "custom/compress-workspaces"
         ]
     },
 
-    // "interval": "once" + "signal": 8 -- workspace-listener.sh (started by
-    // Hyprland on login) watches Hyprland's event socket and sends SIGRTMIN+8
-    // to waybar only when the active workspace actually changes, so these no
-    // longer poll on a 0.3s timer (that was the single biggest battery drain
-    // in this config: ~27 process forks/sec, enough to keep the CPU out of
-    // deep idle continuously)
     "custom/workspace-1": {
-        "min-length": 1,
         "interval": "once",
         "signal": 8,
         "exec": "/home/ryan/nixos/home-config/ryan/scripts/workspace/workspace-button-status.sh 1",
@@ -65,7 +49,6 @@
     },
 
     "custom/workspace-2": {
-        "min-length": 1,
         "interval": "once",
         "signal": 8,
         "exec": "/home/ryan/nixos/home-config/ryan/scripts/workspace/workspace-button-status.sh 2",
@@ -76,7 +59,6 @@
     },
 
     "custom/workspace-3": {
-        "min-length": 1,
         "interval": "once",
         "signal": 8,
         "exec": "/home/ryan/nixos/home-config/ryan/scripts/workspace/workspace-button-status.sh 3",
@@ -87,7 +69,6 @@
     },
 
     "custom/workspace-4": {
-        "min-length": 1,
         "interval": "once",
         "signal": 8,
         "exec": "/home/ryan/nixos/home-config/ryan/scripts/workspace/workspace-button-status.sh 4",
@@ -97,99 +78,210 @@
         "on-click": "/home/ryan/nixos/home-config/ryan/scripts/workspace/workspace-switch.sh 4"
     },
 
-    // packs occupied workspaces down to 1, 2, 3... closing gaps left by
-    // empty ones (windows on 2 and 4 become 1 and 2)
     "custom/compress-workspaces": {
-        "min-length": 1,
         "tooltip": true,
-        "tooltip-format": "Compress workspaces",
-        "format": "",
+        "tooltip-format": "Compress occupied workspaces (1..N)",
+        "format": "󰡍",
         "on-click": "/home/ryan/nixos/home-config/ryan/scripts/workspace/workspace-compress.sh"
     },
 
-    // "hyprland/window": {
-    //     "format": "{class} | {title}",
-    //     "max-length": 80,
-    //     "separate-outputs": true,
-    //     "rewrite": {
-    //         "(.*) - Mozilla Firefox": "$1",
-    //         "(.*) — Mozilla Firefox": "$1"
-    //     }
-    // },
-
-
-
-    // GET AUDIO DEVICES:
-    // wpctl list-devices
-    // pipe into less, search for Mic or speaker (or sink)
-    // last call was:
-    // id 64 is builtin HiFi speaker
-    // id 65 is builtin stereo mic (dont use)
-    // id 66 is builtin digital mic
-    //
+    // ============ LEFT: MEDIA & AUDIO ISLAND (accent: mauve) ============
+    "group/media": {
+        "orientation": "horizontal",
+        "modules": [
+            "pulseaudio#speaker",
+            "pulseaudio#microphone",
+            "mpris"
+        ]
+    },
 
     "pulseaudio#speaker": {
-        "min-length": 6,
         "format": "{icon} {volume}%",
+        "min-length": 9,
         "format-muted": "󰝟 muted",
         "format-icons": {
-        "default": ["󰕿", "󰖀", "󰕾"]
+            "default": ["󰕿", "󰖀", "󰕾"]
         },
         "scroll-step": 1,
         "on-click": "wezterm start --class wiremix -- wiremix",
         "on-click-right": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
-        "tooltip-format": "{desc}\nVolume: {volume}%"
+        "tooltip-format": "{desc}\nSpeaker volume: {volume}%"
     },
 
     "pulseaudio#microphone": {
-        "min-length": 6,
         "format": "{format_source}",
-        "format-source": " ready",
-        "format-source-muted": "  muted",
+        "min-length": 9,
+        "format-source": "󰍬 ready",
+        "format-source-muted": "󰍭 muted",
         "on-click": "wezterm start --class wiremix -- wiremix",
         "on-click-right": "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle",
-        "tooltip": true
+        "tooltip-format": "Microphone: {source_desc}\nInput level: {source_volume}%"
+    },
+
+    "mpris": {
+        "format": "{status_icon} {dynamic}",
+        "format-stopped": "",
+        "status-icons": {
+            "playing": "󰐊",
+            "paused": "󰏤",
+            "stopped": ""
+        },
+        "title-len": 22,
+        "artist-len": 16,
+        "dynamic-len": 34,
+        "dynamic-order": ["title", "artist"],
+        "on-click": "playerctl play-pause",
+        "on-click-right": "playerctl next",
+        "on-scroll-up": "playerctl next",
+        "on-scroll-down": "playerctl previous",
+        "tooltip-format": "{player}: {dynamic}"
+    },
+
+    // ============ LEFT: CONNECTIVITY ISLAND (accent: teal) ============
+    "group/connectivity": {
+        "orientation": "horizontal",
+        "modules": [
+            "network",
+            "custom/dns-menu",
+            "bluetooth"
+        ]
+    },
+
+    "custom/dns-menu": {
+        "interval": 10,
+        "signal": 11,
+        "exec": "bash /home/ryan/nixos/home-config/ryan/scripts/dns/dns-status.sh",
+        "return-type": "json",
+        "format": "{text}",
+        "on-click-right": "bash /home/ryan/nixos/home-config/ryan/scripts/dns/dns-toggle.sh",
+        "menu": "on-click",
+        "menu-file": "/home/ryan/nixos/home-config/ryan/waybar-config/menus/dns-menu.xml",
+        "menu-actions": {
+            "off": "bash /home/ryan/nixos/home-config/ryan/scripts/dns/dns-off.sh",
+            "direct": "bash /home/ryan/nixos/home-config/ryan/scripts/dns/dns-direct.sh",
+            "tor": "bash /home/ryan/nixos/home-config/ryan/scripts/dns/dns-tor.sh"
+        }
+    },
+
+    "network": {
+        "interval": 10,
+        "format-wifi": "󰤨 {essid}",
+        "format-ethernet": "󰈀 wired",
+        "format-disconnected": "󰤭 offline",
+        "format-disabled": "󰤭 off",
+        "tooltip-format-wifi": "󰤨  {essid} · {signalStrength}% ({signaldBm} dBm · {frequency} GHz)\nIP: {ipaddr}/{cidr} · GW: {gwaddr}\n↓ {bandwidthDownBits}   ↑ {bandwidthUpBits}",
+        "tooltip-format-ethernet": "󰈀  {ifname}\nIP: {ipaddr}/{cidr}\n↓ {bandwidthDownBits}   ↑ {bandwidthUpBits}",
+        "tooltip-format-disconnected": "Network disconnected",
+        "on-click": "wezterm start --class nmtui -- nmtui",
+        "on-click-right": "rfkill toggle wifi"
     },
 
     "bluetooth": {
-        "controller": "tpacpi_bluetooth_sw",  // thinkpad wifi controller ( rfkill )
-        "min-length": 3,
-        "interval": 2,
+        "controller": "tpacpi_bluetooth_sw",
+        "interval": 10,
         "format": "󰂯 {status}",
+        "format-on": "󰂯 on",
+        "format-off": "󰂲 off",
         "format-disabled": "󰂲 off",
-        "format-connected": "󰂱  {num_connections}",
-        "format-no-controller": "...",
-        "tooltip-format": "Controller: {controller_alias} ({controller_address})\nConnected devices: {num_connections}\n{device_enumerate}",
+        "format-connected": "󰂱 {num_connections}",
+        "format-no-controller": "󰂲 off",
+        "tooltip-format": "󰂯  Bluetooth ({status})\nController: {controller_alias} ({controller_address})\nConnected: {num_connections}\n{device_enumerate}",
         "tooltip-format-enumerate-connected": "  · {device_alias} ({device_address})",
         "tooltip-format-enumerate-connected-battery": "  · {device_alias} ({device_address}) — {device_battery_percentage}%",
         "on-click": "wezterm start --class bluetuith -- bluetuith",
         "on-click-right": "rfkill toggle bluetooth"
     },
 
+    // ============ CENTER: CLOCK ISLAND (accent: text / blue) ============
+    "clock": {
+        "interval": 60,
+        "format": "󰃰  {:%a %b %d  ·  %I:%M %p}",
+        "tooltip-format": "<tt>{calendar}</tt>",
+        "calendar": {
+            "mode": "month",
+            "mode-mon-col": 3,
+            "weeks-pos": "right",
+            "on-scroll": 1,
+            "format": {
+                "months": "<span color='#89b4fa'><b>{}</b></span>",
+                "days": "<span color='#cdd6f4'>{}</span>",
+                "weeks": "<span color='#6c7086'>[{}]</span>",
+                "weekdays": "<span color='#a6adc8'><b>{}</b></span>",
+                "today": "<span color='#a6e3a1'><b><u>{}</u></b></span>"
+            }
+        }
+    },
 
-    "network": {
-        "interval": 3,
-        "min-length": 10,
-        "format-wifi": "󰤨  {essid}",
-        "format-ethernet": "󰈀  wired",
-        "format-disconnected": "󰤭  offline...",
-        "format-disabled": "󰤭  disabled",
-        "tooltip-format-wifi": "{essid} · {signalStrength}% signal ({signaldBm} dBm)\nFreq: {frequency} GHz\n\nIP: {ipaddr}/{cidr}\nGateway: {gwaddr}\nNetmask: {netmask}\nMAC (BSSID): {bssid}\n\n↓ {bandwidthDownBits}   ↑ {bandwidthUpBits}",
-        "tooltip-format-ethernet": "{ifname}\nIP: {ipaddr}/{cidr}\n↓ {bandwidthDownBits}   ↑ {bandwidthUpBits}",
-        "tooltip-format-disconnected": "Disconncted",
-        // nmtui run bare had nothing to draw into -- waybar has no TTY, so the
-        // previous on-click was silently going nowhere. Open it in a wezterm
-        // window instead, same as the bluetooth/audio TUIs below.
-        "on-click": "wezterm start --class nmtui -- nmtui",
-        "on-click-right": "rfkill toggle wifi"
+    // ============ RIGHT: DISPLAY ISLAND (accent: yellow) ============
+    "group/display": {
+        "orientation": "horizontal",
+        "modules": [
+            "idle_inhibitor",
+            "backlight"
+        ]
+    },
+
+    "idle_inhibitor": {
+        "format": "{icon}",
+        "format-icons": {
+            "activated": "󰈈 awake",
+            "deactivated": "󰾪"
+        },
+        "tooltip-format-activated": "Idle inhibitor: ON (screen stays awake)",
+        "tooltip-format-deactivated": "Idle inhibitor: OFF (normal dim/sleep)"
+    },
+
+    "backlight": {
+        "format": "{icon} {percent}%",
+        "format-icons": ["󰃞", "󰃟", "󰃠"],
+        "reverse-scrolling": true,
+        "tooltip-format": "Display backlight: {percent}%\nScroll to adjust"
+    },
+
+    // ============ RIGHT: HARDWARE & THERMALS ISLAND (accent: sapphire) ============
+    "group/stats": {
+        "orientation": "horizontal",
+        "modules": [
+            "custom/cpu",
+            "custom/memory",
+            "custom/temperature",
+            "custom/fan-menu"
+        ]
+    },
+
+    "custom/cpu": {
+        "interval": 5,
+        "exec": "bash /home/ryan/nixos/home-config/ryan/scripts/stats/cpu-status.sh",
+        "return-type": "json",
+        "format": "{text}",
+        "on-click": "wezterm start --class stats-tui -- bash /home/ryan/nixos/home-config/ryan/scripts/stats/stats-tui.sh",
+        "on-click-right": "wezterm start --class btop -- btop"
+    },
+
+    "custom/memory": {
+        "interval": 10,
+        "exec": "bash /home/ryan/nixos/home-config/ryan/scripts/stats/memory-status.sh",
+        "return-type": "json",
+        "format": "{text}",
+        "on-click": "wezterm start --class stats-tui -- bash /home/ryan/nixos/home-config/ryan/scripts/stats/stats-tui.sh",
+        "on-click-right": "wezterm start --class btop -- btop"
+    },
+
+    "custom/temperature": {
+        "interval": 8,
+        "exec": "bash /home/ryan/nixos/home-config/ryan/scripts/stats/temperature-status.sh",
+        "return-type": "json",
+        "format": "{text}",
+        "on-click": "wezterm start --class stats-tui -- bash /home/ryan/nixos/home-config/ryan/scripts/stats/stats-tui.sh"
     },
 
     "custom/fan-menu": {
-        "min-length": 6,
         "interval": 10,
-        "exec": "/home/ryan/nixos/home-config/ryan/scripts/fan/fan-status.sh",
+        "signal": 10,
+        "exec": "bash /home/ryan/nixos/home-config/ryan/scripts/fan/fan-status.sh",
         "return-type": "json",
         "format": "{text}",
+        "on-click-right": "bash /home/ryan/nixos/home-config/ryan/scripts/fan/fan-toggle.sh",
         "menu": "on-click",
         "menu-file": "/home/ryan/nixos/home-config/ryan/waybar-config/menus/fan-menu.xml",
         "menu-actions": {
@@ -199,12 +291,23 @@
         }
     },
 
+    // ============ RIGHT: POWER & BATTERY ISLAND (accent: green / sapphire / peach) ============
+    "group/power": {
+        "orientation": "horizontal",
+        "modules": [
+            "custom/power-menu",
+            "custom/battery-changes",
+            "battery"
+        ]
+    },
+
     "custom/power-menu": {
-        "min-length": 6,
-        "interval": 2,
-        "exec": "/home/ryan/nixos/home-config/ryan/scripts/power/power-status.sh",
+        "interval": "once",
+        "signal": 9,
+        "exec": "bash /home/ryan/nixos/home-config/ryan/scripts/power/power-status.sh",
         "return-type": "json",
         "format": "{text}",
+        "on-click-right": "bash /home/ryan/nixos/home-config/ryan/scripts/power/power-toggle.sh",
         "menu": "on-click",
         "menu-file": "/home/ryan/nixos/home-config/ryan/waybar-config/menus/power-menu.xml",
         "menu-actions": {
@@ -214,131 +317,46 @@
         }
     },
 
-    // now-playing; shows nothing when no player is active
-    "mpris": {
-        "interval": 1,
-        "format": "{status_icon} {dynamic}",
-        "format-stopped": "",
-        "status-icons": {
-            "playing": "▶",
-            "paused": "⏸",
-            "stopped": ""
-        },
-        "title-len": 22,
-        "artist-len": 16,
-        "dynamic-len": 36,
-        "dynamic-order": ["title", "artist"],
-        "on-click": "playerctl play-pause",
-        "on-click-right": "playerctl next",
-        "on-scroll-up": "playerctl next",
-        "on-scroll-down": "playerctl previous",
-        "tooltip-format": "{player}: {dynamic}"
-    },
-
-    "clock": {
-        "interval": 60,
-        "format": "{:%A  ·  %I:%M %p  ·  %B %d}",
-        "tooltip-format": "<tt>{calendar}</tt>",
-        "calendar": {
-            "mode": "month",
-            "mode-mon-col": 3,
-            "weeks-pos": "right",
-            "on-scroll": 1,
-            "format": {
-                "months": "<span color='#89b4fa'><b>{}</b></span>",
-                "days": "{}",
-                "weeks": "<span color='#a6adc8'>[{}]</span>",
-                "weekdays": "<span color='#a6adc8'><b>{}</b></span>",
-                "today": "<span color='#f38ba8'><b><u>{}</u></b></span>"
-            }
-        }
-    },
-
-    "idle_inhibitor": {
-        "format": "{icon}",
-        "format-icons": {
-            "activated": "󰈈",
-            "deactivated": "󰾪"
-        },
-        "tooltip-format-activated": "Idle inhibitor: on (screen stays awake)",
-        "tooltip-format-deactivated": "Idle inhibitor: off"
-    },
-
-    "backlight": {
-        "interval": 2,
-        "min-length": 5,
-        "format": "{icon} {percent}%",
-        "format-icons": ["󰃞", "󰃟", "󰃠"],
-        "reverse-scrolling": true,
-        "tooltip-format": "Backlight: {percent}%\nscroll to adjust"
-    },
-
-    "group/stats": {
-        "orientation": "horizontal",
-        "modules": [
-            "cpu",
-            "memory",
-            "temperature"
-        ]
-    },
-
-    "cpu": {
-        "interval": 2,
-        "min-length": 10,
-        "format": "󰘚 {usage:>2}%",
-        "tooltip-format": "Load: {load}\nFreq: {min_frequency}-{max_frequency} GHz (avg {avg_frequency} GHz)\n\n{usage0:>3}% {usage1:>3}% {usage2:>3}% {usage3:>3}% {usage4:>3}%\n{usage5:>3}% {usage6:>3}% {usage7:>3}% {usage8:>3}% {usage9:>3}%\n{usage10:>3}% {usage11:>3}% {usage12:>3}% {usage13:>3}% {usage14:>3}%\n{usage15:>3}% {usage16:>3}% {usage17:>3}% {usage18:>3}% {usage19:>3}%"
-    },
-
-    "memory": {
-        "interval": 3,
-        "min-length": 9,
-        "format": "󰍛 {percentage}%",
-        "tooltip-format": "RAM: {used:0.1f} / {total:0.1f} GiB ({percentage}%)\nAvailable: {avail:0.1f} GiB\n\nSwap: {swapUsed:0.1f} / {swapTotal:0.1f} GiB ({swapPercentage}%)"
-    },
-
-    "temperature": {
-        "interval": 3,
-        "min-length": 8,
-        "thermal-zone": 8,
-        "critical-threshold": 80,
-        "format": "󰔏  {temperatureC}°C",
-        "format-critical": "󰸁  {temperatureC}°C",
-        "tooltip-format": "{temperatureC}°C · {temperatureF}°F · {temperatureK}K\nCritical threshold: 80°C"
+    // Live BAT / AC optimizations pill; hover for highlighted comparison or left-click for TUI
+    "custom/battery-changes": {
+        "interval": 15,
+        "signal": 9,
+        "exec": "bash /home/ryan/nixos/home-config/ryan/scripts/power/battery-changes.sh",
+        "return-type": "json",
+        "format": "{text}",
+        "on-click": "wezterm start --class battery-changes -- bash /home/ryan/nixos/home-config/ryan/scripts/power/battery-changes.sh --interactive",
+        "on-click-right": "bash /home/ryan/nixos/home-config/ryan/scripts/power/power-toggle.sh"
     },
 
     "battery": {
-        "interval": 2,
+        "interval": 15,
         "states": {
             "warning": 30,
             "critical": 15
         },
-        "events": { // 0 = warning, second 0 is default color for warning
+        "events": {
             "on-discharging-warning": "hyprctl notify 0 4000 0 'Charge your damn computer'",
             "on-discharging-critical": "hyprctl notify 1 10000 1 'PLUG ME IN BEFORE YOU KILL ME'",
             "on-charging-100": "hyprctl notify 0 2000 0 'ur good fam'"
         },
-        "full-at": 85, // STOP_CHARGE_THRESH_BAT0
-        "min-length": 14,
-        "format": "{icon} {capacity}% {power:.0f}W",
-        "format-charging": "{icon} {capacity}% +{power:.0f}W",
-        "format-time": "{H}:{m}",
+        "format": "{icon} {capacity}%",
+        "format-charging": "󰂄 {capacity}% · +{power:.1f}W",
+        "format-plugged": "󰚥 {capacity}%",
+        "format-time": "{H}h {M}m",
         "format-icons": [
-        "󰁺",
-        "󰁻",
-        "󰁼",
-        "󰁽",
-        "󰁾",
-        "󰁿",
-        "󰂀",
-        "󰂁",
-        "󰂂",
-        "󰁹"
+            "󰁺",
+            "󰁻",
+            "󰁼",
+            "󰁽",
+            "󰁾",
+            "󰁿",
+            "󰂀",
+            "󰂁",
+            "󰂂",
+            "󰁹"
         ],
-        "tooltip-format": "{capacity}% · {time} remaining\nDraw: {power:.1f}W\n\nCycles: {cycles}\nHealth: {health}%"
-    },
-
-    "tray": {
-        "icon-size": 15,
-        "spacing": 6
+        "on-click": "wezterm start --class battery-changes -- bash /home/ryan/nixos/home-config/ryan/scripts/power/battery-changes.sh --interactive",
+        "on-click-right": "bash /home/ryan/nixos/home-config/ryan/scripts/power/power-toggle.sh",
+        "tooltip-format": "Battery: {capacity}% ({time})\nPower draw: {power:.1f}W\nCycles: {cycles} · Health: {health}%\n(Left-click: Power Optimizations TUI)"
     }
 }

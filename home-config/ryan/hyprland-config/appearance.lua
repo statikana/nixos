@@ -47,6 +47,17 @@ hl.config({
     animations = {
         enabled = true,
     },
+
+    cursor = {
+        -- Keep Intel i915 hardware cursor plane enabled even though the nvidia
+        -- module is loaded, avoiding full compositor redraws on mouse movement
+        no_hardware_cursors = false,
+    },
+
+    render = {
+        -- Bypass compositor rendering for fullscreen windows (e.g. fullscreen video/games)
+        direct_scanout = 1,
+    },
 })
 
 -- Default curves and animations, see https://wiki.hypr.land/Configuring/Advanced-and-Cool/Animations/

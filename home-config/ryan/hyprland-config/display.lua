@@ -26,6 +26,23 @@ hl.monitor({
     scale    = "1.25",
 })
 
+-- Disable GPU-heavy blur, shadows, window translucency, and animations when on
+-- battery so unfocused windows can be occlusion-culled and i915 stays in RC6 longer
+hl.config({
+    decoration = {
+        inactive_opacity = onAC() and 0.95 or 1.0,
+        shadow = {
+            enabled = onAC(),
+        },
+        blur = {
+            enabled = onAC(),
+        },
+    },
+    animations = {
+        enabled = onAC(),
+    },
+})
+
 local suppressMaximizeRule = hl.window_rule({
     -- Ignore maximize requests from all apps. You'll probably like this.
     name  = "suppress-maximize-events",
@@ -67,5 +84,19 @@ hl.window_rule({
     float = true,
 })
 
-hl.env("XCURSOR_SIZE", "24")
-hl.env("HYPRCURSOR_SIZE", "24")
+-- Float the Waybar battery optimizations & hardware stats TUI modals
+hl.window_rule({
+    name  = "float-waybar-tuis",
+    match = { class = "^(battery-changes|stats-tui)$" },
+
+    size  = "820 740",
+    float = true,
+})
+
+hl.env("XCURSOR_THEME", "Bibata-Modern-Classic")
+hl.env("XCURSOR_SIZE", "28")
+hl.env("HYPRCURSOR_THEME", "Bibata-Modern-Classic")
+hl.env("HYPRCURSOR_SIZE", "28")
+
+-- Ensure Hyprland & XWayland immediately apply the cursor theme on config load/reload
+hl.exec_cmd("hyprctl setcursor Bibata-Modern-Classic 28")

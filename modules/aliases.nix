@@ -6,7 +6,7 @@
         # Nix
         n = "cd ~/nixos && code .";
         e = "code";
-        reb = "sudo nixos-rebuild switch";
+        reb = "sudo nixos-rebuild switch --flake ~/nixos#ryan-nixos";
         gc = "nix-store --gc";
         pks = "code ~/nixos/modules/packages.nix";
 

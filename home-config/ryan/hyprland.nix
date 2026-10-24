@@ -1,4 +1,17 @@
-{ ... }: {
+{ pkgs, ... }: {
+    # Unified cursor theme across Hyprland (hyprcursor), GTK 2/3/4, Qt, and XWayland.
+    # Replaces Hyprland's built-in fallback cursor (which is tiny and missing many poses)
+    # with Bibata-Modern-Classic (high-contrast dark body + white outline, all poses).
+    home.pointerCursor = {
+        enable = false;
+        name = "Bibata-Modern-Classic";
+        package = pkgs.bibata-cursors;
+        size = 8;
+        gtk.enable = true;
+        x11.enable = true;
+        hyprcursor.enable = true;
+    };
+
     # https://wiki.nixos.org/wiki/Hyprland#Display_Manager_Support
     # make sure you're on
     wayland.windowManager.hyprland = {

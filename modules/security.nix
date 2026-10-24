@@ -29,6 +29,18 @@
                         command = "/run/current-system/sw/bin/systemctl start undervolt-saver.service";
                         options = [ "NOPASSWD" ];
                     }
+                    {
+                        command = "/run/current-system/sw/bin/systemctl start dns-proxy-off.service";
+                        options = [ "NOPASSWD" ];
+                    }
+                    {
+                        command = "/run/current-system/sw/bin/systemctl start dns-proxy-direct.service";
+                        options = [ "NOPASSWD" ];
+                    }
+                    {
+                        command = "/run/current-system/sw/bin/systemctl start dns-proxy-tor.service";
+                        options = [ "NOPASSWD" ];
+                    }
                 ];
             }
         ];

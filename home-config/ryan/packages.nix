@@ -17,15 +17,15 @@
         wev # wayland events
         playerctl # audio stuff
         pavucontrol #... other audio stuff?
-        networkmanagerapplet # NM GUI
         hyprpicker # colors
         cliphist
-        blueman
         pulseaudio
         peazip
         impala
         bluetuith # TUI bluetooth manager, replaces blueman-manager on waybar left-click
         wiremix # TUI pipewire mixer, replaces pavucontrol on waybar left-click
         nerd-fonts.jetbrains-mono
+        bibata-cursors # Complete XCursor + Hyprcursor theme with all cursor poses
+        adwaita-icon-theme # Standard GTK icon/cursor fallback
     ];
 }
