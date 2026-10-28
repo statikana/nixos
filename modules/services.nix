@@ -104,6 +104,66 @@ let
         ${pkgs.iptables}/bin/ip6tables -t filter -A TOR_FILTER6 -j REJECT --reject-with icmp6-adm-prohibited
         ${pkgs.iptables}/bin/ip6tables -t filter -A OUTPUT -j TOR_FILTER6
     '';
+
+    # Helper script to tear down Cloudflare WARP WireGuard interface (warp0)
+    stopWarpTunnel = pkgs.writeShellScript "stop-warp-tunnel" ''
+        export PATH="${pkgs.iproute2}/bin:${pkgs.iptables}/bin:${pkgs.wireguard-tools}/bin:${pkgs.openresolv}/bin:${pkgs.procps}/bin:${pkgs.coreutils}/bin:${pkgs.gnugrep}/bin:${pkgs.gnused}/bin:${pkgs.gawk}/bin:$PATH"
+
+        ${pkgs.iptables}/bin/iptables -t filter -D OUTPUT -j WARP_FILTER 2>/dev/null || true
+        ${pkgs.iptables}/bin/iptables -t filter -F WARP_FILTER 2>/dev/null || true
+        ${pkgs.iptables}/bin/iptables -t filter -X WARP_FILTER 2>/dev/null || true
+
+        ${pkgs.iptables}/bin/ip6tables -t filter -D OUTPUT -j WARP_FILTER6 2>/dev/null || true
+        ${pkgs.iptables}/bin/ip6tables -t filter -F WARP_FILTER6 2>/dev/null || true
+        ${pkgs.iptables}/bin/ip6tables -t filter -X WARP_FILTER6 2>/dev/null || true
+
+        if [ -f /var/lib/wgcf/warp0.conf ] && ${pkgs.iproute2}/bin/ip link show warp0 >/dev/null 2>&1; then
+            ${pkgs.wireguard-tools}/bin/wg-quick down /var/lib/wgcf/warp0.conf 2>/dev/null || ${pkgs.iproute2}/bin/ip link del dev warp0 2>/dev/null || true
+        elif ${pkgs.iproute2}/bin/ip link show warp0 >/dev/null 2>&1; then
+            ${pkgs.iproute2}/bin/ip link del dev warp0 2>/dev/null || true
+        fi
+    '';
+
+    # Helper script to auto-register wgcf (first run only) and bring up Cloudflare WARP (warp0)
+    startWarpTunnel = pkgs.writeShellScript "start-warp-tunnel" ''
+        set -e
+        export PATH="${pkgs.iproute2}/bin:${pkgs.iptables}/bin:${pkgs.wireguard-tools}/bin:${pkgs.openresolv}/bin:${pkgs.procps}/bin:${pkgs.coreutils}/bin:${pkgs.gnugrep}/bin:${pkgs.gnused}/bin:${pkgs.gawk}/bin:$PATH"
+
+        ${stopWarpTunnel}
+
+        mkdir -p /var/lib/wgcf
+        chmod 700 /var/lib/wgcf
+        cd /var/lib/wgcf
+
+        if [ ! -f /var/lib/wgcf/wgcf-account.toml ]; then
+            ${pkgs.wgcf}/bin/wgcf register --accept-tos
+        fi
+
+        if [ ! -f /var/lib/wgcf/wgcf-profile.conf ]; then
+            ${pkgs.wgcf}/bin/wgcf generate
+        fi
+
+        # Strip DNS lines (handled by dnscrypt-proxy-direct on 127.0.0.1:53) and use
+        # Cloudflare WARP's direct anycast IPv4 endpoint so wg-quick never blocks on DNS
+        ${pkgs.gnugrep}/bin/grep -v '^DNS *=' /var/lib/wgcf/wgcf-profile.conf \
+            | ${pkgs.gnused}/bin/sed 's/engage\.cloudflareclient\.com:2408/162.159.192.1:2408/g' \
+            > /var/lib/wgcf/warp0.conf
+        chmod 600 /var/lib/wgcf/warp0.conf
+
+        ${pkgs.wireguard-tools}/bin/wg-quick up /var/lib/wgcf/warp0.conf
+
+        # Reset pre-existing TCP/UDP sockets still bound to the LAN source IP so browsers
+        # immediately open fresh connections through warp0 (172.16.0.2) without hanging
+        ${pkgs.iptables}/bin/iptables -t filter -N WARP_FILTER
+        ${pkgs.iptables}/bin/iptables -t filter -A WARP_FILTER -o warp0 ! -s 172.16.0.0/12 -p tcp -j REJECT --reject-with tcp-reset
+        ${pkgs.iptables}/bin/iptables -t filter -A WARP_FILTER -o warp0 ! -s 172.16.0.0/12 -p udp -j REJECT --reject-with icmp-port-unreachable
+        ${pkgs.iptables}/bin/iptables -t filter -A OUTPUT -j WARP_FILTER
+
+        ${pkgs.iptables}/bin/ip6tables -t filter -N WARP_FILTER6
+        ${pkgs.iptables}/bin/ip6tables -t filter -A WARP_FILTER6 -o warp0 ! -s 2606:4700::/32 -p tcp -j REJECT --reject-with tcp-reset
+        ${pkgs.iptables}/bin/ip6tables -t filter -A WARP_FILTER6 -o warp0 ! -s 2606:4700::/32 -p udp -j REJECT --reject-with icmp6-adm-prohibited
+        ${pkgs.iptables}/bin/ip6tables -t filter -A OUTPUT -j WARP_FILTER6
+    '';
 in
 {
     services = {
@@ -329,6 +389,7 @@ in
                 Type = "oneshot";
                 ExecStart = pkgs.writeShellScript "dns-proxy-off" ''
                     ${stopTorTransProxy}
+                    ${stopWarpTunnel}
                     /run/current-system/sw/bin/resolvconf -d lo.dnscrypt -f || true
                     /run/current-system/sw/bin/systemctl stop dnscrypt-proxy-direct.service dnscrypt-proxy-tor.service tor.service || true
                     echo "off" > /run/dns-proxy-mode
@@ -343,10 +404,27 @@ in
                 Type = "oneshot";
                 ExecStart = pkgs.writeShellScript "dns-proxy-direct" ''
                     ${stopTorTransProxy}
+                    ${stopWarpTunnel}
                     /run/current-system/sw/bin/systemctl stop dnscrypt-proxy-tor.service tor.service || true
                     /run/current-system/sw/bin/systemctl start dnscrypt-proxy-direct.service
                     printf "nameserver 127.0.0.1\n" | /run/current-system/sw/bin/resolvconf -a lo.dnscrypt -x
                     echo "direct" > /run/dns-proxy-mode
+                    chmod 0644 /run/dns-proxy-mode
+                '';
+            };
+        };
+
+        dns-proxy-warp = {
+            description = "DNS Proxy Mode: Cloudflare WARP (WireGuard Full Tunnel + Cloudflare DoH)";
+            serviceConfig = {
+                Type = "oneshot";
+                ExecStart = pkgs.writeShellScript "dns-proxy-warp" ''
+                    ${stopTorTransProxy}
+                    /run/current-system/sw/bin/systemctl stop dnscrypt-proxy-tor.service tor.service || true
+                    /run/current-system/sw/bin/systemctl start dnscrypt-proxy-direct.service
+                    printf "nameserver 127.0.0.1\n" | /run/current-system/sw/bin/resolvconf -a lo.dnscrypt -x
+                    ${startWarpTunnel}
+                    echo "warp" > /run/dns-proxy-mode
                     chmod 0644 /run/dns-proxy-mode
                 '';
             };
@@ -357,6 +435,7 @@ in
             serviceConfig = {
                 Type = "oneshot";
                 ExecStart = pkgs.writeShellScript "dns-proxy-tor" ''
+                    ${stopWarpTunnel}
                     /run/current-system/sw/bin/systemctl stop dnscrypt-proxy-direct.service || true
                     /run/current-system/sw/bin/systemctl start tor.service
                     # Wait for Tor to bind SOCKS5 (127.0.0.1:9050 = 0100007F:235A) before starting dnscrypt-proxy-tor

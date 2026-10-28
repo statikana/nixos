@@ -190,6 +190,12 @@ menu menuitem:active {
   color: @sapphire;
 }
 
+#custom-dns-menu.warp {
+  background-color: alpha(@peach, 0.14);
+  border: 1px solid alpha(@peach, 0.4);
+  color: @peach;
+}
+
 #custom-dns-menu.tor {
   background-color: alpha(@mauve, 0.14);
   border: 1px solid alpha(@mauve, 0.4);
@@ -214,6 +220,12 @@ menu menuitem:active {
   background-color: alpha(@sapphire, 0.2);
   border: 1px solid @sapphire;
   color: @sapphire;
+}
+
+#custom-dns-menu.warp:hover {
+  background-color: alpha(@peach, 0.22);
+  border: 1px solid @peach;
+  color: @peach;
 }
 
 #custom-dns-menu.tor:hover {

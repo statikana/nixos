@@ -11,6 +11,10 @@
     networking.networkmanager.enable = true;
     # networking.nameservers = ["127.0.0.1"];
 
+    # Required for wg-quick policy routing (Cloudflare WARP tunnel on warp0)
+    # so strict reverse-path filtering doesn't drop incoming WireGuard packets
+    networking.firewall.checkReversePath = "loose";
+
     # networking.firewall.allowedUDPPorts = [ ... ];
     # networking.firewall.enable = false;
 

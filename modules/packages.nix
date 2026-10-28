@@ -83,6 +83,8 @@ in
         dig
         cloudflared
         dnscrypt-proxy
+        wgcf
+        wireguard-tools
         qbittorrent
         tree
         gparted
@@ -126,6 +128,7 @@ in
         config.boot.kernelPackages.turbostat
 
         antigravity-cli
+        google-chrome
 
 
         powertop

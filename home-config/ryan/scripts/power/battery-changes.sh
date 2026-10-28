@@ -120,23 +120,20 @@ if [ "${1:-}" = "--interactive" ] || [ "${1:-}" = "--dump-once" ]; then
     }
 
     if [ "${1:-}" = "--interactive" ]; then
+        printf '\033[?1049h\033[2J\033[H'
         tput civis 2>/dev/null || true
-        trap 'tput cnorm 2>/dev/null || true; clear' EXIT INT TERM
-        clear
+        trap 'tput cnorm 2>/dev/null || true; printf "\033[?1049l"' EXIT INT TERM
     fi
 
-    while true; do
-        collect_state
-        [ "${1:-}" = "--interactive" ] && printf '\033[H'
-
+    render_frame() {
         if [ "$ac" = "0" ]; then
-            src_txt=$(printf "%-28s" " ● ON BATTERY (DISCHARGING)")
+            src_txt=$(printf "%-30s" " ● ON BATTERY (DISCHARGING)")
             src_badge="${BG_GREEN}${src_txt}${RST}"
             draw_plain=$(printf "-%sW (%s%%)" "$power_w" "$bat_cap")
             draw_pad=$(printf "%-22s" "$draw_plain")
             draw_str="${GREEN}${draw_pad}${RST}"
         else
-            src_txt=$(printf "%-28s" " ● ON AC POWER (${bat_status^^})")
+            src_txt=$(printf "%-30s" " ● ON AC POWER (${bat_status^^})")
             src_badge="${BG_BLUE}${src_txt}${RST}"
             draw_plain=$(printf "%sW (%s%%)" "$power_w" "$bat_cap")
             draw_pad=$(printf "%-22s" "$draw_plain")
@@ -146,12 +143,11 @@ if [ "${1:-}" = "--interactive" ] || [ "${1:-}" = "--dump-once" ]; then
         printf "${BORDER}╭──────────────────────────────────────────────────────────────────────────────╮${RST}${EL}\n"
         printf "${BORDER}│${RST}  ${BOLD}${TXT}󰌪  ThinkPad P1 Gen 5 — Power & Battery Optimizations${RST}                        ${BORDER}│${RST}${EL}\n"
         printf "${BORDER}├──────────────────────────────────────────────────────────────────────────────┤${RST}${EL}\n"
-        printf "${BORDER}│${RST}  %s   ${SUB}Battery:${RST} %s              ${BORDER}│${RST}${EL}\n" "$src_badge" "$draw_str"
+        printf "${BORDER}│${RST}  %s   ${SUB}Battery:${RST} %s            ${BORDER}│${RST}${EL}\n" "$src_badge" "$draw_str"
         printf "${BORDER}│${RST}  ${SUB}Active Pill:${RST}  ${BG_GREEN} ● Battery State ${RST}  ${DIM}/${RST}  ${BG_BLUE} ● AC State ${RST}  ${DIM}/${RST}  ${BG_PEACH} ● Performance ${RST}        ${BORDER}│${RST}${EL}\n"
         printf "${BORDER}╰──────────────────────────────────────────────────────────────────────────────╯${RST}${EL}\n"
 
-        printf "${EL}\n ${MAUVE}󰍹  Display & Compositor (Hyprland + Intel Iris Xe)${RST}${EL}\n"
-        printf " ${BORDER}──────────────────────────────────────────────────────────────────────────────${RST}${EL}\n"
+        printf " ${MAUVE}󰍹  Display & Compositor (Hyprland + Intel Iris Xe)${RST} ${BORDER}───────────────────────────${RST}${EL}\n"
         printf "  ${TXT}%-28s${RST} %s${EL}\n" "eDP-1 Refresh Rate" \
             "$(fmt_pair "$([ "$edp_hz" -le 65 ] 2>/dev/null && echo bat || echo ac)" "60 Hz" "165 Hz")"
         printf "  ${TXT}%-28s${RST} %s${EL}\n" "Window Blur & Drop Shadows" \
@@ -162,8 +158,7 @@ if [ "${1:-}" = "--interactive" ] || [ "${1:-}" = "--dump-once" ]; then
             "$(fmt_pair "$([ "$blur_on" = "0" ] && echo bat || echo ac)" "Disabled" "Enabled")"
         printf "  ${TXT}%-28s${RST} ${TEAL}● Always On${RST}  ${SUB}(i915 HW Cursor Plane + Direct Scanout)${RST}${EL}\n" "Hardware Cursor & Scanout"
 
-        printf "${EL}\n ${PEACH}󰘚  CPU, Thermals & Fan Control (i7-12700H)${RST}${EL}\n"
-        printf " ${BORDER}──────────────────────────────────────────────────────────────────────────────${RST}${EL}\n"
+        printf " ${PEACH}󰘚  CPU, Thermals & Fan Control (i7-12700H)${RST} ${BORDER}───────────────────────────────────${RST}${EL}\n"
         prof_idx=2
         [ "$profile" = "low-power" ] && prof_idx=1
         [ "$profile" = "performance" ] && prof_idx=3
@@ -187,16 +182,14 @@ if [ "${1:-}" = "--interactive" ] || [ "${1:-}" = "--dump-once" ]; then
         printf "  ${TXT}%-28s${RST} %s  ${SUB}(mode: ${fan_mode})${RST}${EL}\n" "ThinkFan Acoustic Curve" \
             "$(fmt_pair "$([ "${fan_rpm:-0}" -eq 0 ] 2>/dev/null && echo bat || echo ac)" "0 RPM (<${fan_zero_up}°C)" "Active (${fan_rpm} RPM)")"
 
-        printf "${EL}\n ${YELLOW}󰢮  Graphics & Media Engines (Iris Xe + RTX A2000)${RST}${EL}\n"
-        printf " ${BORDER}──────────────────────────────────────────────────────────────────────────────${RST}${EL}\n"
+        printf " ${YELLOW}󰢮  Graphics & Media Engines (Iris Xe + RTX A2000)${RST} ${BORDER}────────────────────────────${RST}${EL}\n"
         printf "  ${TXT}%-28s${RST} %s  ${SUB}(+ FBC & GuC=3)${RST}${EL}\n" "Intel Iris Xe Max Clock" \
             "$(fmt_pair "$([ "${igpu_max:-1400}" -le 700 ] 2>/dev/null && echo bat || echo ac)" "600 MHz Cap" "1400 MHz Boost")"
         printf "  ${TXT}%-28s${RST} %s  ${SUB}(VRAM Off + S0ix=1)${RST}${EL}\n" "NVIDIA RTX A2000 State" \
             "$(fmt_pair "$([ "$dgpu_state" = "D3cold" ] && echo bat || echo ac)" "D3cold (0W Off)" "${dgpu_state} (Active)")"
         printf "  ${TXT}%-28s${RST} ${TEAL}● Always On${RST}  ${SUB}(Mesa EGL + Intel Vulkan + iHD VA-API)${RST}${EL}\n" "dGPU Isolation & VA-API"
 
-        printf "${EL}\n ${BLUE}󰋊  Storage, Radios & Background Daemons${RST}${EL}\n"
-        printf " ${BORDER}──────────────────────────────────────────────────────────────────────────────${RST}${EL}\n"
+        printf " ${BLUE}󰋊  Storage, Radios & Background Daemons${RST} ${BORDER}──────────────────────────────────────${RST}${EL}\n"
         printf "  ${TXT}%-28s${RST} %s${EL}\n" "PCIe ASPM Link Policy" \
             "$(fmt_pair "$([ "$aspm" = "powersupersave" ] && echo bat || echo ac)" "powersupersave" "$aspm")"
         printf "  ${TXT}%-28s${RST} %s  ${SUB}(+ ext4 noatime)${RST}${EL}\n" "NVMe Dirty Writeback" \
@@ -204,15 +197,28 @@ if [ "${1:-}" = "--interactive" ] || [ "${1:-}" = "--dump-once" ]; then
         printf "  ${TXT}%-28s${RST} %s  ${SUB}(iwlmvm scheme 3)${RST}${EL}\n" "Intel CNVi Wi-Fi Power Save" \
             "$(fmt_pair "$([ "$wifi_ps" = "on" ] && echo bat || echo ac)" "On (Low-Power)" "Off (Low-Latency)")"
         printf "  ${TXT}%-28s${RST} ${TEAL}● Always On${RST}  ${SUB}(HDA ${snd_ps}s sleep · 01:00.1 & libcamera off)${RST}${EL}\n" "Audio & Webcam Isolation"
-        printf "  ${TXT}%-28s${RST} ${TEAL}● On-Demand${RST}  ${SUB}(Docker: ${docker_state} · BT: ${bt_state} · BAT 75–85%)${RST}${EL}\n" "Daemons & Charge Cap"
+        printf "  ${TXT}%-28s${RST} ${TEAL}● On-Demand${RST}  ${SUB}(Docker: ${docker_state} · BT: ${bt_state} · BAT 75–85%%)${RST}${EL}\n" "Daemons & Charge Cap"
 
         mode_pad=$(printf "%-11s" "$mode")
         fan_pad=$(printf "%-5s" "$fan_mode")
-        printf "${EL}\n${BORDER}╭──────────────────────────────────────────────────────────────────────────────╮${RST}${EL}\n"
-        printf "${BORDER}│${RST}  ${BG_SURF} [p] ${RST} Power: ${BOLD}${TXT}${mode_pad}${RST} ${BG_SURF} [f] ${RST} Fan: ${BOLD}${TXT}${fan_pad}${RST} ${BG_SURF} [b] ${RST} Toggle BT   ${BG_SURF} [q] ${RST} Close TUI  ${BORDER}│${RST}${EL}\n"
-        printf "${BORDER}╰──────────────────────────────────────────────────────────────────────────────╯${RST}${EL}\n"
+        printf "${BORDER}╭──────────────────────────────────────────────────────────────────────────────╮${RST}${EL}\n"
+        printf "${BORDER}│${RST}  ${BG_SURF} [p] ${RST} Power: ${BOLD}${TXT}${mode_pad}${RST} ${BG_SURF} [f] ${RST} Fan: ${BOLD}${TXT}${fan_pad}${RST} ${BG_SURF} [b] ${RST} Toggle BT  ${BG_SURF} [q] ${RST} Close TUI  ${BORDER}│${RST}${EL}\n"
+        printf "${BORDER}╰──────────────────────────────────────────────────────────────────────────────╯${RST}${EL}"
+    }
 
-        [ "${1:-}" = "--dump-once" ] && break
+    while true; do
+        collect_state
+
+        if [ "${1:-}" = "--dump-once" ]; then
+            render_frame
+            printf '\n'
+            break
+        fi
+
+        term_rows=$(tput lines 2>/dev/null || echo 40)
+        [ "${term_rows:-0}" -lt 10 ] 2>/dev/null && term_rows=40
+        frame=$(render_frame | head -n "$term_rows")
+        printf '\033[H%s\033[J' "$frame"
 
         if read -rsn1 -t 1.5 key; then
             case "$key" in

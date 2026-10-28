@@ -159,6 +159,7 @@
         "menu-actions": {
             "off": "bash /home/ryan/nixos/home-config/ryan/scripts/dns/dns-off.sh",
             "direct": "bash /home/ryan/nixos/home-config/ryan/scripts/dns/dns-direct.sh",
+            "warp": "bash /home/ryan/nixos/home-config/ryan/scripts/dns/dns-warp.sh",
             "tor": "bash /home/ryan/nixos/home-config/ryan/scripts/dns/dns-tor.sh"
         }
     },

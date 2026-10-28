@@ -38,6 +38,10 @@
                         options = [ "NOPASSWD" ];
                     }
                     {
+                        command = "/run/current-system/sw/bin/systemctl start dns-proxy-warp.service";
+                        options = [ "NOPASSWD" ];
+                    }
+                    {
                         command = "/run/current-system/sw/bin/systemctl start dns-proxy-tor.service";
                         options = [ "NOPASSWD" ];
                     }
