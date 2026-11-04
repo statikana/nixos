@@ -24,10 +24,10 @@ apply_if_changed() {
     ensure_hypr_sig
 
     if [ "$ac" = "1" ]; then
-        hyprctl --batch "keyword monitor eDP-1,2560x1600@165.02,auto,1.25 ; keyword decoration:blur:enabled true ; keyword decoration:shadow:enabled true ; keyword decoration:inactive_opacity 0.95 ; keyword animations:enabled true" >/dev/null 2>&1
+        hyprctl --batch "keyword monitor eDP-1,2560x1600@165.02,auto,1.25 ; keyword decoration:blur:enabled true ; keyword decoration:shadow:enabled true ; keyword animations:enabled true" >/dev/null 2>&1
         /home/ryan/nixos/home-config/ryan/scripts/power/power-balanced.sh >/dev/null 2>&1
     else
-        hyprctl --batch "keyword monitor eDP-1,2560x1600@60.01,auto,1.25 ; keyword decoration:blur:enabled false ; keyword decoration:shadow:enabled false ; keyword decoration:inactive_opacity 1.0 ; keyword animations:enabled false" >/dev/null 2>&1
+        hyprctl --batch "keyword monitor eDP-1,2560x1600@60.01,auto,1.25 ; keyword decoration:blur:enabled false ; keyword decoration:shadow:enabled false ; keyword animations:enabled false" >/dev/null 2>&1
         /home/ryan/nixos/home-config/ryan/scripts/power/power-saver.sh >/dev/null 2>&1
     fi
 }

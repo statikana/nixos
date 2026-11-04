@@ -194,14 +194,6 @@ while true; do
     printf "  ${TXT}%-20s${RST} %s  ${TEAL}%s / %s GiB (%d%%)${RST}${EL}\n" \
         "Swap Partition" "$(make_ansi_bar "$swap_pct" 18 "$TEAL")" "$swap_used_gib" "$swap_total_gib" "$swap_pct"
 
-    printf "${EL}\n ${YELLOW}󰓅  Top Active Processes (CPU vs Memory)${RST}${EL}\n"
-    printf " ${BORDER}──────────────────────────────────────────────────────────────────────────────${RST}${EL}\n"
-    mapfile -t top_c < <(ps -eo pcpu=,comm= --sort=-pcpu 2>/dev/null | head -n 4 | awk '{c=$1; $1=""; sub(/^[ \t]+/,"",$0); printf "%-18s %5.1f%%", substr($0,1,18), c}')
-    mapfile -t top_m < <(ps -eo rss=,comm= --sort=-rss 2>/dev/null | head -n 4 | awk '{r=$1; $1=""; sub(/^[ \t]+/,"",$0); printf "%-18s %5.2fG", substr($0,1,18), r/1048576}')
-    for ((r=0; r<4; r++)); do
-        printf "  ${TXT}%-26s${RST}          ${TXT}%-26s${RST}${EL}\n" "${top_c[$r]:-}" "${top_m[$r]:-}"
-    done
-
     fan_pad=$(printf "%-5s" "$fan_mode")
     printf "${EL}\n${BORDER}╭──────────────────────────────────────────────────────────────────────────────╮${RST}${EL}\n"
     printf "${BORDER}│${RST}  ${BG_SURF} [b] ${RST} Open btop   ${BG_SURF} [p] ${RST} Battery TUI   ${BG_SURF} [f] ${RST} Fan: ${BOLD}${TXT}${fan_pad}${RST}   ${BG_SURF} [q] ${RST} Close TUI    ${BORDER}│${RST}${EL}\n"

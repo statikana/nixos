@@ -129,6 +129,9 @@ in
 
         antigravity-cli
         google-chrome
+        pandoc
+        nautilus
+        slack
 
 
         powertop
@@ -140,5 +143,6 @@ in
         bitwarden-desktop
         vinegar
         steam
+        obsidian
     ];
 }

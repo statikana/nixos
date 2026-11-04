@@ -152,8 +152,6 @@ if [ "${1:-}" = "--interactive" ] || [ "${1:-}" = "--dump-once" ]; then
             "$(fmt_pair "$([ "$edp_hz" -le 65 ] 2>/dev/null && echo bat || echo ac)" "60 Hz" "165 Hz")"
         printf "  ${TXT}%-28s${RST} %s${EL}\n" "Window Blur & Drop Shadows" \
             "$(fmt_pair "$([ "$blur_on" = "0" ] && echo bat || echo ac)" "Disabled" "Enabled")"
-        printf "  ${TXT}%-28s${RST} %s${EL}\n" "Unfocused Window Opacity" \
-            "$(fmt_pair "$([ "$blur_on" = "0" ] && echo bat || echo ac)" "1.00 (Opaque)" "0.95 (Glass)")"
         printf "  ${TXT}%-28s${RST} %s${EL}\n" "Workspace Animations" \
             "$(fmt_pair "$([ "$blur_on" = "0" ] && echo bat || echo ac)" "Disabled" "Enabled")"
         printf "  ${TXT}%-28s${RST} ${TEAL}● Always On${RST}  ${SUB}(i915 HW Cursor Plane + Direct Scanout)${RST}${EL}\n" "Hardware Cursor & Scanout"
@@ -278,7 +276,6 @@ tt="${hdr}  <span foreground='#6c7086'>(BAT / AC)</span>\n"
 tt+="<span foreground='#cba6f7' weight='bold'>── Display &amp; Compositor ──────────────────────</span>\n"
 tt+="  Refresh Rate (eDP-1):   $(pango_pair "$([ "$edp_hz" -le 65 ] 2>/dev/null && echo bat || echo ac)" "60 Hz" "165 Hz")\n"
 tt+="  Blur / Shadows / Anim:  $(pango_pair "$([ "$blur_on" = "0" ] && echo bat || echo ac)" "Off" "On")\n"
-tt+="  Unfocused Opacity:      $(pango_pair "$([ "$blur_on" = "0" ] && echo bat || echo ac)" "1.00 Opaque" "0.95 Glass")\n"
 tt+="  Cursor &amp; Fullscreen:    <span foreground='#94e2d5'>HW Cursor Plane + Direct Scanout</span>\n"
 tt+="\n<span foreground='#fab387' weight='bold'>── CPU, Thermals &amp; Fan (i7-12700H) ───────────</span>\n"
 tt+="  ACPI Platform Profile:  $(pango_triple "$prof_idx" "low-power" "balanced" "perf")\n"

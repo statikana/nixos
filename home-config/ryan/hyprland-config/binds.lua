@@ -1,7 +1,7 @@
 print("binds.lua")
 
 local terminal = "wezterm"
-local fileManager = "dolphin"
+local fileManager = "nautilus"
 local menu = "wofi --show drun"
 
 local mainMod = "SUPER"
@@ -13,7 +13,7 @@ hl.bind(mainMod .. " + W", hl.dsp.exec_cmd(SCRIPTS .. "/waybar-toggle.sh"))
 hl.bind(mainMod .. " + V", hl.dsp.exec_cmd("cliphist list | wofi --dmenu | cliphist decode | wl-copy"))
 hl.bind(mainMod .. " + I", hl.dsp.exec_cmd("hyprpicker --autocopy --format hex"))
 hl.bind(mainMod .. " + N", hl.dsp.exec_cmd("cd ~/nixos && code ."))
-hl.bind(mainMod .. " + D", hl.dsp.exec_cmd("cd ~/documents && code ."))
+hl.bind(mainMod .. " + O", hl.dsp.exec_cmd("obsidian"))
 
 hl.bind(mainMod .. " + P", hl.dsp.exec_cmd("wezterm "))
 hl.bind("Print", hl.dsp.exec_cmd("hyprshot --mode region"))
@@ -36,6 +36,10 @@ hl.bind(mainMod .. " + right", hl.dsp.focus({ direction = "right" }))
 hl.bind(mainMod .. " + up",    hl.dsp.focus({ direction = "up" }))
 hl.bind(mainMod .. " + down",  hl.dsp.focus({ direction = "down" }))
 
+    hl.bind(mainMod .. " + SHIFT + left",  hl.dsp.window.move({ direction = "left" }))
+    hl.bind(mainMod .. " + SHIFT + right", hl.dsp.window.move({ direction = "right" }))
+    hl.bind(mainMod .. " + SHIFT + up",    hl.dsp.window.move({ direction = "up" }))
+    hl.bind(mainMod .. " + SHIFT + down",  hl.dsp.window.move({ direction = "down" }))
 -- Switch workspaces with mainMod + [0-9]
 -- Move active window to a workspace with mainMod + SHIFT + [0-9]
 for i = 1, 10 do

@@ -26,23 +26,6 @@ hl.monitor({
     scale    = "1.25",
 })
 
--- Disable GPU-heavy blur, shadows, window translucency, and animations when on
--- battery so unfocused windows can be occlusion-culled and i915 stays in RC6 longer
-hl.config({
-    decoration = {
-        inactive_opacity = onAC() and 0.95 or 1.0,
-        shadow = {
-            enabled = onAC(),
-        },
-        blur = {
-            enabled = onAC(),
-        },
-    },
-    animations = {
-        enabled = onAC(),
-    },
-})
-
 local suppressMaximizeRule = hl.window_rule({
     -- Ignore maximize requests from all apps. You'll probably like this.
     name  = "suppress-maximize-events",
