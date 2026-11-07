@@ -26,6 +26,13 @@ in
             qgroundcontrol = prev.qgroundcontrol.overrideAttrs (old: {
                 NIX_CFLAGS_COMPILE = "-Wno-error";
             });
+            obsidian = prev.obsidian.overrideAttrs (old: rec {
+                version = "1.15.0";
+                src = prev.fetchurl {
+                    url = "https://github.com/obsidianmd/obsidian-releases/releases/download/v${version}/obsidian-${version}.tar.gz";
+                    hash = "sha256-dVlK4JkUygGR3eE8Bpfe5lMyIoejqAbBVRkzLZraFNM=";
+                };
+            });
         })
     ];
 
@@ -133,7 +140,6 @@ in
         nautilus
         slack
 
-
         powertop
         dmidecode
 
@@ -144,5 +150,6 @@ in
         vinegar
         steam
         obsidian
+        openclaw
     ];
 }
