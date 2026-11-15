@@ -20,6 +20,15 @@ let
         unset VK_DRIVER_FILES
         exec "$@"
     '';
+
+    # Work around patchelf 0.19.2 overlapping LOAD segments on non-PIE nvidia-smi
+    # (which leaves .dynamic mapped read-only and segfaults in ld-linux-x86-64.so.2).
+    nvidia-smi-fixed = pkgs.lib.hiPrio (pkgs.writeShellScriptBin "nvidia-smi" ''
+        exec ${pkgs.stdenv.cc.libc}/lib/ld-linux-x86-64.so.2 \
+            --argv0 "$0" \
+            --library-path "${config.hardware.nvidia.package.out}/lib:${pkgs.stdenv.cc.libc}/lib" \
+            "${config.hardware.nvidia.package.bin}/origBin/nvidia-smi" "$@"
+    '');
 in
 {
     # Enable OpenGL + Intel Iris Xe VA-API / QuickSync hardware video decoding
@@ -31,7 +40,7 @@ in
         ];
     };
 
-    environment.systemPackages = [ nvidia-offload ];
+    environment.systemPackages = [ nvidia-offload nvidia-smi-fixed ];
 
     # Load nvidia driver for Xorg and Wayland
     services.xserver.videoDrivers = [ "nvidia" ];

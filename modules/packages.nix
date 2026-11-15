@@ -18,6 +18,24 @@ let
             {
                 inherit (pkgs.stdenv.hostPlatform) system;
             };
+    commonsPkgs = with pkgs; [
+            nss # libnss3, libnssutil3, libsmime3
+            nspr # libnspr4
+            alsa-lib # libasound
+            at-spi2-core # libatk, libatk-bridge, libatspi
+            cups # libcups
+            libdrm
+            libgbm
+            libx11
+            libxcb
+            libxcomposite
+            libxdamage
+            libxext
+            libxfixes
+            libxrandr
+            libxkbcommon
+            expat
+        ];
 in
 
 {
@@ -150,6 +168,19 @@ in
         vinegar
         steam
         obsidian
-        openclaw
+        wine
+        lyx
+    ] ++ commonsPkgs;
+
+    # Libraries Playwright's downloaded Chrome needs (headless browser testing).
+    # Merged with the nix-ld libraries in programs.nix; exposed via /run/current-system/sw/share/nix-ld/lib.
+    programs.nix-ld = {
+        enable = true;
+        libraries = commonsPkgs;
+    };
+
+    # link shared libs to the usual /usr/lib
+    systemd.tmpfiles.rules = [
+        "L+ /usr/lib - - - - /run/current-system/sw/share/nix-ld/lib"
     ];
 }
