@@ -1,0 +1,182 @@
+/* Minimal Waybar stylesheet:
+ * - Flush top bar across full screen width (0 radius on outer bar)
+ * - 3 restrained islands with sharp 4px corners
+ * - Calm monochrome slate palette with a single steel-blue accent (#89b4fa)
+ */
+
+@define-color crust    #11111b;
+@define-color mantle   #161622;
+@define-color surface0 #282a3d;
+@define-color surface1 #383b54;
+@define-color overlay0 #6c7086;
+@define-color subtext0 #a6adc8;
+@define-color subtext1 #bac2de;
+@define-color text     #cdd6f4;
+
+@define-color accent   #89b4fa;
+@define-color yellow   #f9e2af;
+@define-color red      #f38ba8;
+@define-color green    #a6e3a1;
+
+* {
+  font-family: "JetBrainsMono Nerd Font", "JetBrains Mono", monospace;
+  font-size: 13.5px;
+  font-weight: 500;
+  min-height: 0;
+  border: none;
+  border-radius: 0;
+}
+
+window#waybar {
+  background: transparent;
+  color: @text;
+}
+
+/* Flush edge-to-edge bar */
+window#waybar > box {
+  background: @mantle;
+  border-bottom: 1px solid @surface0;
+  border-radius: 0;
+  padding: 0 10px;
+}
+
+/* ============ 3 Sharp-Cornered Islands ============ */
+#workspaces,
+#clock,
+#system {
+  background: @crust;
+  border: 1px solid @surface0;
+  border-radius: 4px;
+  padding: 0 4px;
+  margin: 4px 0;
+}
+
+/* ============ Tooltips ============ */
+tooltip {
+  background-color: @mantle;
+  border: 1px solid @surface1;
+  border-radius: 4px;
+}
+
+tooltip label {
+  color: @text;
+  font-size: 13px;
+  padding: 8px 12px;
+}
+
+/* ============ 1. Workspaces Island ============ */
+#custom-workspace-1,
+#custom-workspace-2,
+#custom-workspace-3,
+#custom-workspace-4 {
+  font-size: 14.5px;
+  padding: 2px 12px;
+  margin: 3px 2px;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  color: @overlay0;
+  transition: all 0.12s ease;
+}
+
+#custom-workspace-1:not(.active):hover,
+#custom-workspace-2:not(.active):hover,
+#custom-workspace-3:not(.active):hover,
+#custom-workspace-4:not(.active):hover {
+  background-color: alpha(@text, 0.06);
+  color: @text;
+}
+
+#custom-workspace-1.active,
+#custom-workspace-2.active,
+#custom-workspace-3.active,
+#custom-workspace-4.active {
+  background-color: alpha(@accent, 0.14);
+  border: 1px solid alpha(@accent, 0.55);
+  color: @accent;
+  font-weight: 600;
+}
+
+/* ============ 2. Center Clock Island ============ */
+#clock {
+  font-size: 13.5px;
+  padding: 2px 16px;
+  color: @text;
+  font-weight: 600;
+  transition: all 0.12s ease;
+}
+
+#clock:hover {
+  border-color: @surface1;
+  background-color: alpha(@text, 0.04);
+}
+
+/* ============ 3. Unified System Tray Island ============ */
+#custom-hwmon,
+#quick,
+#battery {
+  margin: 3px 2px;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  color: @subtext1;
+  transition: all 0.12s ease;
+}
+
+#custom-hwmon {
+  font-size: 16.5px;
+  padding: 2px 12px;
+}
+
+/* Merged Quick Settings pill (Wi-Fi + Audio) highlights as one cohesive button */
+#quick {
+  padding: 2px 6px;
+}
+
+#network,
+#pulseaudio {
+  font-size: 16.5px;
+  padding: 0 7px;
+  color: @subtext1;
+}
+
+#battery {
+  font-size: 13.5px;
+  padding: 2px 12px;
+}
+
+#custom-hwmon:hover,
+#quick:hover,
+#battery:hover {
+  background-color: alpha(@accent, 0.12);
+  border: 1px solid alpha(@accent, 0.45);
+  color: @text;
+}
+
+#quick:hover #network,
+#quick:hover #pulseaudio {
+  color: @text;
+}
+
+/* Muted / Offline understated states */
+#network.disconnected,
+#network.disabled,
+#pulseaudio.muted {
+  color: @overlay0;
+}
+
+/* Semantic states ONLY when attention is warranted */
+#custom-hwmon.warning,
+#battery.warning:not(.charging) {
+  color: @yellow;
+}
+
+#custom-hwmon.critical,
+#battery.critical:not(.charging) {
+  color: @red;
+  background-color: alpha(@red, 0.14);
+  border: 1px solid alpha(@red, 0.6);
+}
+
+#battery.charging,
+#battery.plugged {
+  color: @green;
+}
