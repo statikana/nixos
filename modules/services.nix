@@ -170,13 +170,13 @@ in
 
         flatpak.enable = true;
 
-        printing.enable = false; # CUPS 
+        printing.enable = false; # CUPS
 
         avahi = {
             enable = false;
             # nssmdns4 = true;
             # openFirewall = true;
-        }; 
+        };
 
         libinput.enable = true; # touchpad
 
@@ -213,7 +213,7 @@ in
         power-profiles-daemon = {
             enable = false;
         };
-        
+
         tlp = {
             enable = true;
             settings = {
@@ -277,13 +277,41 @@ in
 
             # [fan level, step-down temperature, step-up temperature]
             levels = [
-                [ 0 0 48 ]
-                [ 1 44 54 ]
-                [ 2 50 60 ]
-                [ 3 56 65 ]
-                [ 6 60 72 ]
-                [ 7 68 85 ]
-                [ "level disengaged" 80 255 ] # disengaged = FLOOR IT
+                [
+                    0
+                    0
+                    48
+                ]
+                [
+                    1
+                    44
+                    54
+                ]
+                [
+                    2
+                    50
+                    60
+                ]
+                [
+                    3
+                    56
+                    65
+                ]
+                [
+                    6
+                    60
+                    72
+                ]
+                [
+                    7
+                    68
+                    85
+                ]
+                [
+                    "level disengaged"
+                    80
+                    255
+                ] # disengaged = FLOOR IT
             ];
         };
 
@@ -292,7 +320,8 @@ in
             SUBSYSTEM=="hidraw", ATTRS{idVendor}=="1915", ATTRS{idProduct}=="520a", MODE="0660", GROUP="input"
         '';
 
-        undervolt = {  # undervolting / RAPL power limits for intel cpus
+        undervolt = {
+            # undervolting / RAPL power limits for intel cpus
             enable = true;
             # https://edc.intel.com/content/www/us/en/design/ipla/software-development-platforms/client/platforms/alder-lake-desktop/12th-generation-intel-core-processors-datasheet-volume-1-of-2/package-power-control/
             turbo = 1;
@@ -301,16 +330,22 @@ in
             # interrupt storm across all 20 threads while RAPL caps power smoothly
             tempBat = 65; # target temp on battery
             temp = 85;
-            
+
             # fuck u intel, just make better cpus
             # coreOffset = -150;
             # uncoreOffset = -150;
 
-            gpuOffset = 0;  # integrated GPU?
+            gpuOffset = 0; # integrated GPU?
 
             # PL1 (sustained) / PL2 (boost) power limits, in watts
-            p1 = { limit = 35; window = 28; };
-            p2 = { limit = 65; window = 0.002; };
+            p1 = {
+                limit = 35;
+                window = 28;
+            };
+            p2 = {
+                limit = 65;
+                window = 0.002;
+            };
 
         };
     };
@@ -328,21 +363,21 @@ in
             description = "Undervolt profile: performance";
             serviceConfig = {
                 Type = "oneshot";
-                ExecStart = ''${pkgs.undervolt}/bin/undervolt --turbo 0 --power-limit-long 45 28 --power-limit-short 115 0.002'';
+                ExecStart = "${pkgs.undervolt}/bin/undervolt --turbo 0 --power-limit-long 45 28 --power-limit-short 115 0.002";
             };
         };
         undervolt-balanced = {
             description = "Undervolt profile: balanced";
             serviceConfig = {
                 Type = "oneshot";
-                ExecStart = ''${pkgs.undervolt}/bin/undervolt --turbo 0 --power-limit-long 35 28 --power-limit-short 65 0.002'';
+                ExecStart = "${pkgs.undervolt}/bin/undervolt --turbo 0 --power-limit-long 35 28 --power-limit-short 65 0.002";
             };
         };
         undervolt-saver = {
             description = "Undervolt profile: saver";
             serviceConfig = {
                 Type = "oneshot";
-                ExecStart = ''${pkgs.undervolt}/bin/undervolt --turbo 1 --power-limit-long 20 28 --power-limit-short 35 0.002'';
+                ExecStart = "${pkgs.undervolt}/bin/undervolt --turbo 1 --power-limit-long 20 28 --power-limit-short 35 0.002";
             };
         };
 

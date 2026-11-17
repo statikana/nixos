@@ -120,10 +120,10 @@ in
 
             # CLI Utils
             ffmpeg
-            dig                 # dns / http querying
-            cloudflared         # CF outward tunnel daemon
-            dnscrypt-proxy      # proxy utils
-            wgcf                # idr
+            dig # dns / http querying
+            cloudflared # CF outward tunnel daemon
+            dnscrypt-proxy # proxy utils
+            wgcf # idr
             wireguard-tools
             qbittorrent
             tree
@@ -191,11 +191,11 @@ in
             ghostscript
             poppler-utils
             librsvg
-            manim           # math animation library
-            chromium        
-            glib            # gnome lib tools
-            lufus           # rufus for linux
-            ventoy          # flash iso
+            manim # math animation library
+            chromium
+            glib # gnome lib tools
+            lufus # rufus for linux
+            ventoy # flash iso
         ]
         ++ commonsPkgs;
 

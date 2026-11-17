@@ -4,7 +4,8 @@
     lib,
     inputs,
     ...
-}:{
+}:
+{
     imports = [
         ./modules
         ./hardware-configuration.nix
@@ -16,7 +17,7 @@
 
     nixpkgs.config = {
         allowUnfree = true;
-        permittedInsecurePackages = ["ventoy-1.1.18"];
+        permittedInsecurePackages = [ "ventoy-1.1.18" ];
     };
 
     nix.settings.experimental-features = [
