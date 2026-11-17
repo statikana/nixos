@@ -1,12 +1,12 @@
-{ ... }:
-
-{
+{ ... }: {
 
     programs.bash.shellAliases = {
         # Nix
         n = "cd ~/nixos && code .";
         e = "code";
-        reb = "sudo nixos-rebuild switch --flake ~/nixos#ryan-nixos";
+        # reb = "git add .; git commit -m \"rebuild \" && git push && sudo nixos-rebuild switch --flake ~/nixos#ryan-nixos";
+        reb-offline = "~/nixos/rebuld.sh offline";
+        reb = "~/nixos/rebuild.sh";
         gc = "nix-store --gc";
         pks = "code ~/nixos/modules/packages.nix";
 

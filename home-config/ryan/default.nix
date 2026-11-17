@@ -1,6 +1,4 @@
-{ lib, ... }:
-{
-    # home-manager.users."ryan" = ...
+{ lib, ... }: {
 
     home.stateVersion = "26.05";
     home.enableNixpkgsReleaseCheck = false; # syabuuuuu
@@ -18,5 +16,5 @@
             name: _: ./. + (builtins.trace "home cfg: ${name}" "/${name}") # relative pathing
         ))
     ];
-
+    
 }

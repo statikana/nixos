@@ -59,5 +59,13 @@
             xwayland.enable = true;
         };
 
+        claude-desktop = {
+            enable = true;
+            cowork = {
+                enable = true;
+                users = [ "ryan" ];
+            };
+        };
+
     };
 }

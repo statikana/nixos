@@ -19,23 +19,23 @@ let
                 inherit (pkgs.stdenv.hostPlatform) system;
             };
     commonsPkgs = with pkgs; [
-            nss # libnss3, libnssutil3, libsmime3
-            nspr # libnspr4
-            alsa-lib # libasound
-            at-spi2-core # libatk, libatk-bridge, libatspi
-            cups # libcups
-            libdrm
-            libgbm
-            libx11
-            libxcb
-            libxcomposite
-            libxdamage
-            libxext
-            libxfixes
-            libxrandr
-            libxkbcommon
-            expat
-        ];
+        nss # libnss3, libnssutil3, libsmime3
+        nspr # libnspr4
+        alsa-lib # libasound
+        at-spi2-core # libatk, libatk-bridge, libatspi
+        cups # libcups
+        libdrm
+        libgbm
+        libx11
+        libxcb
+        libxcomposite
+        libxdamage
+        libxext
+        libxfixes
+        libxrandr
+        libxkbcommon
+        expat
+    ];
 in
 
 {
@@ -51,126 +51,153 @@ in
                     hash = "sha256-dVlK4JkUygGR3eE8Bpfe5lMyIoejqAbBVRkzLZraFNM=";
                 };
             });
+            pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
+                (python-final: python-prev: {
+                    manim = python-prev.manim.overridePythonAttrs (old: {
+                        # Click/Cloup help formatting differs ([COMMAND] vs COMMAND),
+                        # matching the existing upstream-nixpkgs exclusion of test_manim_cfg_subcommand.
+                        disabledTests = (old.disabledTests or [ ]) ++ [
+                            "test_manim_init_subcommand"
+                        ];
+                    });
+                })
+            ];
         })
     ];
 
-    environment.systemPackages = with pkgs; [
-        # System
-        hyprland
+    environment.systemPackages =
+        with pkgs;
+        [
+            # System
+            hyprland
 
-        # Editors
-        kdePackages.kate
-        vscode
-        neovim
+            # Editors
+            kdePackages.kate
+            vscode
+            neovim
 
-        # Version control
-        git
-        gh
+            # Version control
+            git
+            gh
 
-        # Formatting
-        nixfmt
-        nixd
+            # Formatting
+            nixfmt
+            nixd
 
-        # Languages
-        rustup
+            # Languages
+            rustup
 
-        gnumake
-        libgcc
-        gcc
+            gnumake
+            libgcc
+            gcc
 
-        (python3.withPackages (
-            ps: with ps; [
-                pip
-                requests
-                numpy
-                pandas
-                stable-baselines3
-                openmpi
-                pygame-ce
-                kconfiglib
-            ]
-        ))
+            (python3.withPackages (
+                ps: with ps; [
+                    # pip
+                    requests
+                    numpy
+                    pandas
+                    stable-baselines3
+                    openmpi
+                    pygame-ce
+                    kconfiglib
+                    sympy
+                    manim
+                ]
+            ))
 
-        rust-analyzer
-        gdb
-        lua51Packages.luarocks-nix
+            rust-analyzer
+            gdb
+            lua51Packages.luarocks-nix
 
-        # Development
-        docker
-        nodejs
-        openmpi
-        opencodePkgs.opencode
-        claude-code
-        cmake
+            # Development
+            docker
+            nodejs
+            openmpi
+            opencodePkgs.opencode
+            claude-code
+            cmake
 
-        # CLI Utils
-        ffmpeg
-        dig
-        cloudflared
-        dnscrypt-proxy
-        wgcf
-        wireguard-tools
-        qbittorrent
-        tree
-        gparted
-        cheese
-        nmap
-        hwinfo
-        fastfetch
-        btop
-        nvtopPackages.full
-        tmux
-        unzip
-        uv
-        harbor-cli
-        lldb
-        nvitop
-        wezterm
+            # CLI Utils
+            ffmpeg
+            dig                 # dns / http querying
+            cloudflared         # CF outward tunnel daemon
+            dnscrypt-proxy      # proxy utils
+            wgcf                # idr
+            wireguard-tools
+            qbittorrent
+            tree
+            gparted
+            cheese
+            nmap
+            hwinfo
+            fastfetch
+            btop
+            nvtopPackages.full
+            tmux
+            unzip
+            uv
+            harbor-cli
+            lldb
+            nvitop
+            wezterm
+            php
+            php84Packages.composer
 
-        zoxide
-        fzf # file find
-        tldr # man summary
-        atuin # commands
-        lazygit
-        jq # json
+            zoxide
+            fzf # file find
+            tldr # man summary
+            atuin # commands
+            lazygit
+            jq # json
 
-        ripgrep
-        socat # workspace-listener.sh reads Hyprland's event socket
-        tor
-        p7zip
-        parted
-        uefitool
-        ifrextractor-rs
-        file
-        pciutils
-        usbutils
-        psmisc
-        libva-utils
-        intel-gpu-tools
-        nvme-cli
-        acpi
-        config.boot.kernelPackages.cpupower
-        config.boot.kernelPackages.turbostat
+            ripgrep
+            socat # workspace-listener.sh reads Hyprland's event socket
+            tor
+            p7zip
+            parted
+            uefitool
+            ifrextractor-rs
+            file
+            pciutils
+            usbutils
+            psmisc
+            libva-utils
+            intel-gpu-tools
+            nvme-cli
+            acpi
+            config.boot.kernelPackages.cpupower
+            config.boot.kernelPackages.turbostat
 
-        antigravity-cli
-        google-chrome
-        pandoc
-        nautilus
-        slack
+            antigravity-cli
+            google-chrome
+            pandoc
+            nautilus
+            slack
 
-        powertop
-        dmidecode
+            powertop
+            dmidecode
 
-        # Desktop apps
-        qgroundcontrol
-        discord
-        bitwarden-desktop
-        vinegar
-        steam
-        obsidian
-        wine
-        lyx
-    ] ++ commonsPkgs;
+            # Desktop apps
+            qgroundcontrol
+            discord
+            bitwarden-desktop
+            vinegar
+            steam
+            obsidian
+            wine
+            lyx
+            texliveFull
+            ghostscript
+            poppler-utils
+            librsvg
+            manim           # math animation library
+            chromium        
+            glib            # gnome lib tools
+            lufus           # rufus for linux
+            ventoy          # flash iso
+        ]
+        ++ commonsPkgs;
 
     # Libraries Playwright's downloaded Chrome needs (headless browser testing).
     # Merged with the nix-ld libraries in programs.nix; exposed via /run/current-system/sw/share/nix-ld/lib.
