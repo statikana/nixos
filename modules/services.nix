@@ -616,7 +616,6 @@ in
     environment.pathsToLink = [ "/share/icons" ];
 
     services = {
-
         flatpak.enable = true;
 
         printing.enable = false; # CUPS
