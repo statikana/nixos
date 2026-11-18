@@ -4,6 +4,8 @@
         enableDefaultPackages = true;
 
         packages = with pkgs; [
+            nerd-fonts.jetbrains-mono
+
             # LaTeX / LyX OpenType & TrueType fonts (screen display and XeTeX/LuaTeX non-TeX fonts)
             lmodern
             gyre-fonts

@@ -277,8 +277,344 @@ let
                 ;;
         esac
     '';
+
+    # Custom Qt6 Catppuccin Mocha + Steel-Blue SDDM theme bundling glassy_bands.png
+    # and supporting both instant password login and empty-Enter fingerprint login.
+    sddmTheme = pkgs.runCommand "sddm-catppuccin-glassy" { } ''
+        themeDir="$out/share/sddm/themes/catppuccin-glassy"
+        mkdir -p "$themeDir"
+        cp -r "${pkgs.catppuccin-sddm}/share/sddm/themes/catppuccin-mocha-mauve/"* "$themeDir/"
+        chmod -R u+w "$themeDir"
+
+        cp "${../assets/glassy_bands.png}" "$themeDir/backgrounds/glassy_bands.png"
+
+        cat > "$themeDir/theme.conf" <<'EOF'
+        [General]
+        Font="JetBrainsMono Nerd Font"
+        FontSize=11
+        ClockEnabled="true"
+        CustomBackground="true"
+        LoginBackground="true"
+        Background="backgrounds/glassy_bands.png"
+        UserIcon="false"
+        PasswordShowLastLetter=0
+        EOF
+
+        cat > "$themeDir/Main.qml" <<'EOF'
+        import QtQuick 2.15
+        import QtQuick.Window 2.15
+        import QtQuick.Controls 2.15
+        import "Components"
+
+        Item {
+          id: root
+          height: Screen.height
+          width: Screen.width
+
+          Rectangle {
+            anchors.fill: parent
+            color: "#11111B"
+            z: 0
+          }
+
+          Image {
+            id: backgroundImage
+            anchors.fill: parent
+            fillMode: Image.PreserveAspectCrop
+            visible: config.CustomBackground == "true"
+            source: config.Background
+            asynchronous: false
+            cache: true
+            mipmap: true
+            clip: true
+            z: 1
+          }
+
+          Rectangle {
+            anchors.fill: parent
+            color: "#6611111B"
+            z: 2
+          }
+
+          Item {
+            id: mainPanel
+            z: 3
+            anchors {
+              fill: parent
+              margins: 44
+            }
+            Clock {
+              id: time
+              visible: config.ClockEnabled == "true"
+            }
+            LoginPanel {
+              id: loginPanel
+              anchors.fill: parent
+            }
+          }
+        }
+        EOF
+
+        cat > "$themeDir/Components/Clock.qml" <<'EOF'
+        import QtQuick 2.15
+
+        Column {
+          id: clockCol
+          spacing: 6
+          anchors {
+            horizontalCenter: parent.horizontalCenter
+            top: parent.top
+            topMargin: parent.height * 0.10
+          }
+
+          property date now: new Date()
+
+          Timer {
+            interval: 1000
+            running: true
+            repeat: true
+            onTriggered: clockCol.now = new Date()
+          }
+
+          Text {
+            anchors.horizontalCenter: parent.horizontalCenter
+            renderType: Text.NativeRendering
+            color: "#CDD6F4"
+            font {
+              family: config.Font
+              pointSize: 52
+              bold: true
+            }
+            text: Qt.formatDateTime(clockCol.now, "hh:mm AP")
+          }
+
+          Text {
+            anchors.horizontalCenter: parent.horizontalCenter
+            renderType: Text.NativeRendering
+            color: "#A6ADC8"
+            font {
+              family: config.Font
+              pointSize: 14
+            }
+            text: Qt.formatDateTime(clockCol.now, "dddd, MMMM d")
+          }
+        }
+        EOF
+
+        cat > "$themeDir/Components/UserField.qml" <<'EOF'
+        import QtQuick 2.15
+        import QtQuick.Controls 2.15
+
+        TextField {
+          id: userField
+          selectByMouse: true
+          echoMode: TextInput.Normal
+          selectionColor: "#45475A"
+          renderType: Text.NativeRendering
+          font {
+            family: config.Font
+            pointSize: config.FontSize
+            bold: true
+          }
+          color: "#CDD6F4"
+          placeholderTextColor: "#6C7086"
+          horizontalAlignment: TextInput.AlignHCenter
+          placeholderText: "Username"
+          text: userModel.lastUser
+          background: Rectangle {
+            radius: 6
+            color: "#11111B"
+            border.width: 1
+            border.color: userField.activeFocus ? "#89B4FA" : "#2E3044"
+          }
+        }
+        EOF
+
+        cat > "$themeDir/Components/PasswordField.qml" <<'EOF'
+        import QtQuick 2.15
+        import QtQuick.Controls 2.15
+
+        TextField {
+          id: passwordField
+          focus: true
+          selectByMouse: true
+          placeholderText: "Password · or Enter for Fingerprint"
+          placeholderTextColor: "#6C7086"
+          echoMode: TextInput.Password
+          passwordCharacter: "•"
+          selectionColor: "#45475A"
+          renderType: Text.NativeRendering
+          font {
+            family: config.Font
+            pointSize: config.FontSize
+          }
+          color: "#CDD6F4"
+          horizontalAlignment: TextInput.AlignHCenter
+          background: Rectangle {
+            radius: 6
+            color: "#11111B"
+            border.width: 1
+            border.color: passwordField.activeFocus ? "#89B4FA" : "#2E3044"
+          }
+        }
+        EOF
+
+        cat > "$themeDir/Components/LoginPanel.qml" <<'EOF'
+        import QtQuick 2.15
+        import QtQuick.Window 2.15
+        import QtQuick.Controls 2.15
+
+        Item {
+          id: panel
+          property string user: userField.text
+          property string password: passwordField.text
+          property int session: sessionPanel.session
+          property real inputHeight: 44
+          property real inputWidth: 340
+          property string statusText: "󰈷  Press Enter for Fingerprint or type password"
+          property string statusColor: "#9399B2"
+
+          function submitLogin() {
+            if (panel.user === "") return
+            if (panel.password === "") {
+              panel.statusText = "󰈷  Place your right index finger on the sensor..."
+              panel.statusColor = "#89B4FA"
+            } else {
+              panel.statusText = "Signing in..."
+              panel.statusColor = "#89B4FA"
+            }
+            sddm.login(panel.user, panel.password, panel.session)
+          }
+
+          Rectangle {
+            id: card
+            width: inputWidth + 48
+            height: formCol.implicitHeight + 44
+            radius: 10
+            color: "#EB161622"
+            border.width: 1
+            border.color: "#2E3044"
+            anchors {
+              horizontalCenter: parent.horizontalCenter
+              verticalCenter: parent.verticalCenter
+              verticalCenterOffset: 48
+            }
+
+            Column {
+              id: formCol
+              width: inputWidth
+              spacing: 12
+              anchors.centerIn: parent
+
+              UserField {
+                id: userField
+                height: inputHeight
+                width: parent.width
+                onAccepted: passwordField.forceActiveFocus()
+              }
+
+              PasswordField {
+                id: passwordField
+                height: inputHeight
+                width: parent.width
+                onAccepted: panel.submitLogin()
+              }
+
+              Button {
+                id: loginButton
+                height: inputHeight
+                width: parent.width
+                enabled: panel.user !== ""
+                hoverEnabled: true
+                onClicked: panel.submitLogin()
+
+                contentItem: Text {
+                  renderType: Text.NativeRendering
+                  font {
+                    family: config.Font
+                    pointSize: config.FontSize
+                    bold: true
+                  }
+                  horizontalAlignment: Text.AlignHCenter
+                  verticalAlignment: Text.AlignVCenter
+                  color: "#11111B"
+                  text: panel.password.length > 0 ? "Unlock" : "󰈷  Scan Fingerprint"
+                }
+
+                background: Rectangle {
+                  radius: 6
+                  color: loginButton.down ? "#74C7EC" : (loginButton.hovered ? "#B4BEFE" : "#89B4FA")
+                }
+              }
+
+              Text {
+                width: parent.width
+                wrapMode: Text.WordWrap
+                horizontalAlignment: Text.AlignHCenter
+                renderType: Text.NativeRendering
+                color: panel.statusColor
+                font {
+                  family: config.Font
+                  pointSize: 9.5
+                }
+                text: panel.statusText
+              }
+            }
+          }
+
+          Row {
+            spacing: 10
+            z: 5
+            anchors {
+              bottom: parent.bottom
+              left: parent.left
+            }
+            PowerButton { id: powerButton }
+            RebootButton { id: rebootButton }
+            SleepButton { id: sleepButton }
+          }
+
+          Row {
+            spacing: 10
+            z: 5
+            anchors {
+              bottom: parent.bottom
+              right: parent.right
+            }
+            SessionPanel { id: sessionPanel }
+          }
+
+          Connections {
+            target: sddm
+
+            function onInformationMessage(message) {
+              panel.statusText = "󰈷  " + message
+              panel.statusColor = message.toLowerCase().indexOf("time") !== -1 ? "#F9E2AF" : "#89B4FA"
+            }
+
+            function onLoginFailed() {
+              passwordField.text = ""
+              passwordField.forceActiveFocus()
+              panel.statusText = "Authentication failed — try again"
+              panel.statusColor = "#F38BA8"
+            }
+
+            function onLoginSucceeded() {
+              panel.statusText = "Unlocked"
+              panel.statusColor = "#A6E3A1"
+            }
+          }
+        }
+        EOF
+    '';
 in
 {
+    environment.systemPackages = [
+        sddmTheme
+        pkgs.bibata-cursors
+    ];
+    environment.pathsToLink = [ "/share/icons" ];
+
     services = {
 
         flatpak.enable = true;
@@ -311,8 +647,27 @@ in
             };
         };
 
-        displayManager.sddm.enable = true;
-        displayManager.sddm.wayland.enable = true;
+        displayManager = {
+            defaultSession = "hyprland-uwsm";
+            sddm = {
+                enable = true;
+                package = pkgs.kdePackages.sddm;
+                wayland.enable = true;
+                enableHidpi = true;
+                theme = "catppuccin-glassy";
+                extraPackages = [
+                    sddmTheme
+                    pkgs.kdePackages.qtsvg.out
+                    pkgs.kdePackages.qtdeclarative.out
+                ];
+                settings = {
+                    Theme = {
+                        CursorTheme = "Bibata-Modern-Classic";
+                        CursorSize = 28;
+                    };
+                };
+            };
+        };
 
         power-profiles-daemon = {
             enable = false;

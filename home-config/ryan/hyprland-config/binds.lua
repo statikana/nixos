@@ -14,6 +14,7 @@ hl.bind(mainMod .. " + V", hl.dsp.exec_cmd("cliphist list | wofi --dmenu | cliph
 hl.bind(mainMod .. " + I", hl.dsp.exec_cmd("hyprpicker --autocopy --format hex"))
 hl.bind(mainMod .. " + N", hl.dsp.exec_cmd("cd ~/nixos && code ."))
 hl.bind(mainMod .. " + O", hl.dsp.exec_cmd("obsidian"))
+hl.bind(mainMod .. " + L", hl.dsp.exec_cmd("loginctl lock-session"))
 
 hl.bind("Print", hl.dsp.exec_cmd("hyprshot --mode region"))
 

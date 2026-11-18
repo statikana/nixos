@@ -7,7 +7,7 @@
                 {
                     fit_mode = "cover";
                     monitor = "";
-                    path = "/home/ryan/Downloads/glassy_bands.png";
+                    path = "/home/ryan/nixos/assets/glassy_bands.png";
                 }
             ];
         };
