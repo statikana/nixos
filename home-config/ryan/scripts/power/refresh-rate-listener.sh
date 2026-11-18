@@ -23,11 +23,22 @@ apply_if_changed() {
     last_ac="$ac"
     ensure_hypr_sig
 
+    local disp_mode edp_cmd
+    disp_mode=$(cat "$XDG_RUNTIME_DIR/display-mode" 2>/dev/null || echo "")
+
     if [ "$ac" = "1" ]; then
-        hyprctl --batch "keyword monitor eDP-1,2560x1600@165.02,auto,1.25 ; keyword decoration:blur:enabled true ; keyword decoration:shadow:enabled true ; keyword animations:enabled true" >/dev/null 2>&1
+        edp_cmd="keyword monitor eDP-1,2560x1600@165.02,auto,1.25 ; "
+        if [ "$disp_mode" = "external" ] && hyprctl monitors -j 2>/dev/null | jq -e '[.[] | select((.name | startswith("eDP") | not) and (.disabled == false))] | length > 0' >/dev/null 2>&1; then
+            edp_cmd=""
+        fi
+        hyprctl --batch "${edp_cmd}keyword decoration:blur:enabled true ; keyword decoration:shadow:enabled true ; keyword animations:enabled true" >/dev/null 2>&1
         /home/ryan/nixos/home-config/ryan/scripts/power/power-balanced.sh >/dev/null 2>&1
     else
-        hyprctl --batch "keyword monitor eDP-1,2560x1600@60.01,auto,1.25 ; keyword decoration:blur:enabled false ; keyword decoration:shadow:enabled false ; keyword animations:enabled false" >/dev/null 2>&1
+        edp_cmd="keyword monitor eDP-1,2560x1600@60.01,auto,1.25 ; "
+        if [ "$disp_mode" = "external" ] && hyprctl monitors -j 2>/dev/null | jq -e '[.[] | select((.name | startswith("eDP") | not) and (.disabled == false))] | length > 0' >/dev/null 2>&1; then
+            edp_cmd=""
+        fi
+        hyprctl --batch "${edp_cmd}keyword decoration:blur:enabled false ; keyword decoration:shadow:enabled false ; keyword animations:enabled false" >/dev/null 2>&1
         /home/ryan/nixos/home-config/ryan/scripts/power/power-saver.sh >/dev/null 2>&1
     fi
 }

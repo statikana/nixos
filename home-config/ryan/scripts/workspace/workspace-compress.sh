@@ -35,4 +35,4 @@ if [ "$new_active" != "$active_before" ]; then
     hyprctl dispatch "hl.dsp.focus({ workspace = $new_active })" >/dev/null
 fi
 
-pkill -RTMIN+8 waybar
+pkill -x -RTMIN+8 '(\.waybar-wrapped|waybar)' 2>/dev/null || true

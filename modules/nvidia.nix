@@ -3,23 +3,24 @@
 {
     pkgs,
     config,
-    libs,
     ...
 }:
 
 let
     # run one app on the dGPU; also undoes the "AMD only" EGL/Vulkan hiding from
     # hypr/env.lua, which NixOS's built-in offload command wouldn't
-    nvidia-offload = pkgs.writeShellScriptBin "nvidia-offload" ''
-        export __NV_PRIME_RENDER_OFFLOAD=1
-        export __NV_PRIME_RENDER_OFFLOAD_PROVIDER=NVIDIA-G0
-        export __GLX_VENDOR_LIBRARY_NAME=nvidia
-        export __VK_LAYER_NV_optimus=NVIDIA_only
-        export __EGL_VENDOR_LIBRARY_FILENAMES=/run/opengl-driver/share/glvnd/egl_vendor.d/10_nvidia.json
-        export LIBVA_DRIVER_NAME=nvidia
-        unset VK_DRIVER_FILES
-        exec "$@"
-    '';
+    nvidia-offload = pkgs.lib.hiPrio (
+        pkgs.writeShellScriptBin "nvidia-offload" ''
+            export __NV_PRIME_RENDER_OFFLOAD=1
+            export __NV_PRIME_RENDER_OFFLOAD_PROVIDER=NVIDIA-G0
+            export __GLX_VENDOR_LIBRARY_NAME=nvidia
+            export __VK_LAYER_NV_optimus=NVIDIA_only
+            export __EGL_VENDOR_LIBRARY_FILENAMES=/run/opengl-driver/share/glvnd/egl_vendor.d/10_nvidia.json
+            export LIBVA_DRIVER_NAME=nvidia
+            unset VK_DRIVER_FILES
+            exec "$@"
+        ''
+    );
 
     # Work around patchelf 0.19.2 overlapping LOAD segments on non-PIE nvidia-smi
     # (which leaves .dynamic mapped read-only and segfaults in ld-linux-x86-64.so.2).
@@ -60,8 +61,8 @@ in
         # Use add|bind to ensure the rule hits regardless of module load timing
         ACTION=="add|bind", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{power/control}="auto", ATTR{power/autosuspend_delay_ms}="100"
 
-        # let the video group pin the dGPU on/off runtime PM (quickshell GPU pill right-click)
-        ACTION=="add|bind", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{class}=="0x030000", RUN+="${pkgs.coreutils}/bin/chgrp video /sys%p/power/control", RUN+="${pkgs.coreutils}/bin/chmod g+w /sys%p/power/control"
+        # let the power_ctl group pin the dGPU on/off runtime PM (Thunderbolt cast & GPU controls)
+        ACTION=="add|bind", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{class}=="0x030000", RUN+="${pkgs.coreutils}/bin/chgrp power_ctl /sys%p/power/control", RUN+="${pkgs.coreutils}/bin/chmod g+w /sys%p/power/control"
 
         # stable paths for AQ_DRM_DEVICES (cardN numbering changes between boots)
         KERNEL=="card*", KERNELS=="0000:00:02.0", SUBSYSTEM=="drm", SUBSYSTEMS=="pci", SYMLINK+="dri/intel-igpu"
@@ -122,7 +123,7 @@ in
             # the formatting is picky
             offload = {
                 enable = true;
-                enableOffloadCmd = true;
+                enableOffloadCmd = false; # custom `nvidia-offload` wrapper defined above
             };
             intelBusId = "PCI:0:2:0";
             nvidiaBusId = "PCI:0:1:0";

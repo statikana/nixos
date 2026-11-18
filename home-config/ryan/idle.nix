@@ -1,10 +1,11 @@
 { pkgs, ... }: {
     programs.hyprlock = {
-        enable = false;
+        enable = true;
         settings = {
             background = [
                 {
                     monitor = "";
+                    path = "/home/ryan/Downloads/glassy_bands.png";
                     blur_passes = 2;
                     blur_size = 4;
                 }
@@ -28,7 +29,7 @@
             general = {
                 lock_cmd = "pidof hyprlock || hyprlock";
                 before_sleep_cmd = "loginctl lock-session";
-                after_sleep_cmd = "hyprctl dispatch dpms on";
+                after_sleep_cmd = "hyprctl dispatch 'hl.dsp.dpms(\"on\")'";
             };
 
             listener = [
@@ -43,8 +44,8 @@
                 }
                 {
                     timeout = 330; # 5.5 min: screen off
-                    on-timeout = "hyprctl dispatch dpms off";
-                    on-resume = "hyprctl dispatch dpms on";
+                    on-timeout = "hyprctl dispatch 'hl.dsp.dpms(\"off\")'";
+                    on-resume = "hyprctl dispatch 'hl.dsp.dpms(\"on\")'";
                 }
                 {
                     timeout = 900; # 15 min: suspend

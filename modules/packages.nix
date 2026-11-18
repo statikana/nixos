@@ -1,7 +1,6 @@
 {
     config,
     pkgs,
-    pkgs-unstable,
     lib,
     inputs,
     ...
@@ -191,7 +190,6 @@ in
             ghostscript
             poppler-utils
             librsvg
-            manim # math animation library
             chromium
             glib # gnome lib tools
             lufus # rufus for linux

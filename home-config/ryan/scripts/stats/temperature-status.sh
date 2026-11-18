@@ -2,7 +2,12 @@
 # Stylized Catppuccin Mocha Temperature status & Pango tooltip for Waybar
 # Reads directly from /proc/acpi/ibm/thermal (the exact tpacpi sensor input used by thinkfan)
 
+export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
 ac=$(cat /sys/class/power_supply/AC/online 2>/dev/null || echo 1)
+pwr_mode=$(cat /run/power-mode "$XDG_RUNTIME_DIR/power-mode" 2>/dev/null | head -n 1)
+[ -z "$pwr_mode" ] && pwr_mode="balanced"
+nvme_model=$(awk '{$1=$1; print}' /sys/class/nvme/nvme0/model 2>/dev/null)
+[ -z "$nvme_model" ] && nvme_model="NVMe"
 
 # thinkfan uses /proc/acpi/ibm/thermal and evaluates the highest active sensor against its levels
 read -r tpacpi_max tpacpi_cpu tpacpi_zones < <(
@@ -90,7 +95,7 @@ for ((c=0; c<filled; c++)); do f_str+="━"; done
 for ((c=0; c<empty; c++)); do e_str+="─"; done
 temp_bar="<span foreground='${t_col}'>${f_str}</span><span foreground='#45475a'>${e_str}</span>"
 
-if [ "$ac" = "0" ]; then
+if [ "$pwr_mode" = "saver" ] || { [ "$pwr_mode" = "balanced" ] && [ "$ac" = "0" ]; }; then
     prochot_str="<span foreground='#a6e3a1' weight='bold'>[65°C BAT]</span> <span foreground='#6c7086'>/ 85°C AC</span>"
 else
     prochot_str="<span foreground='#6c7086'>65°C BAT /</span> <span foreground='#74c7ec' weight='bold'>[85°C AC]</span>"
@@ -109,7 +114,7 @@ tt+="  Active EC Zones: <span foreground='#cdd6f4'>${tpacpi_zones}</span>\n"
 tt+="  Core Die Spread: Min <span foreground='#a6e3a1'>${core_min}°C</span>  ·  Avg <span foreground='#fab387'>${core_avg}°C</span>  ·  Max <span foreground='#f9e2af'>${core_max}°C</span>\n"
 tt+="  PROCHOT Ceiling: ${prochot_str}\n"
 tt+="\n<span foreground='#cba6f7' weight='bold'>── Component Status ────────────────────────</span>\n"
-tt+="  NVMe SSD (Micron 3400):  <span foreground='#94e2d5' weight='bold'>${nvme_temp}°C</span>\n"
+tt+="  NVMe SSD (${nvme_model}):  <span foreground='#94e2d5' weight='bold'>${nvme_temp}°C</span>\n"
 tt+="  RTX A2000 dGPU:          ${dgpu_str}\n"
 tt+="  ThinkFan Speed:          <span foreground='#94e2d5' weight='bold'>${fan_rpm} RPM</span>\n"
 tt+="<span foreground='#6c7086'><i>Left-click: Per-Core Temps &amp; Clocks TUI</i></span>"

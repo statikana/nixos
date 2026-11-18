@@ -1,8 +1,8 @@
 print("display.lua")
 
 -- 165Hz costs real battery for no benefit during normal desktop use, so only
--- run full-rate on AC; refresh-rate-listener.sh calls `hyprctl reload` (which
--- re-evaluates this file) whenever AC is plugged/unplugged
+-- run full-rate on AC; refresh-rate-listener.sh updates eDP-1 and visual effects
+-- via `hyprctl --batch` whenever AC is plugged/unplugged
 local function onAC()
     local f = io.open("/sys/class/power_supply/AC/online", "r")
     if not f then return true end
@@ -64,15 +64,6 @@ hl.window_rule({
     match = { class = "hyprland-run" },
 
     move  = "20 monitor_h-120",
-    float = true,
-})
-
--- Float the Waybar battery optimizations & hardware stats TUI modals
-hl.window_rule({
-    name  = "float-waybar-tuis",
-    match = { class = "^(battery-changes|stats-tui)$" },
-
-    size  = "820 740",
     float = true,
 })
 

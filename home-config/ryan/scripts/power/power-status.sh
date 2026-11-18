@@ -2,7 +2,8 @@
 # Stylized Catppuccin Mocha Power Profile status & Pango tooltip for Waybar
 
 export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
-mode=$(cat "$XDG_RUNTIME_DIR/power-mode" 2>/dev/null || echo balanced)
+mode=$(cat /run/power-mode "$XDG_RUNTIME_DIR/power-mode" 2>/dev/null | head -n 1)
+[ -z "$mode" ] && mode="balanced"
 PROFILE=$(cat /sys/firmware/acpi/platform_profile 2>/dev/null || echo unknown)
 PL1=$(($(cat /sys/class/powercap/intel-rapl:0/constraint_0_power_limit_uw 2>/dev/null || echo 0) / 1000000))
 PL2=$(($(cat /sys/class/powercap/intel-rapl:0/constraint_1_power_limit_uw 2>/dev/null || echo 0) / 1000000))
@@ -37,9 +38,9 @@ case "$mode" in
         printf '{"text":"󰓅 perf","class":"performance","tooltip":"%s"}\n' "$tt"
         ;;
     saver)
-        printf '{"text":"󰾅 saver","class":"saver","tooltip":"%s"}\n' "$tt"
+        printf '{"text":"󰾆 saver","class":"saver","tooltip":"%s"}\n' "$tt"
         ;;
     *)
-        printf '{"text":"󰾆 bal","class":"balanced","tooltip":"%s"}\n' "$tt"
+        printf '{"text":"󰾅 bal","class":"balanced","tooltip":"%s"}\n' "$tt"
         ;;
 esac

@@ -3,20 +3,18 @@
     # Replaces Hyprland's built-in fallback cursor (which is tiny and missing many poses)
     # with Bibata-Modern-Classic (high-contrast dark body + white outline, all poses).
     home.pointerCursor = {
-        enable = false;
+        enable = true;
         name = "Bibata-Modern-Classic";
         package = pkgs.bibata-cursors;
-        size = 8;
+        size = 28;
         gtk.enable = true;
         x11.enable = true;
         hyprcursor.enable = true;
     };
 
     # https://wiki.nixos.org/wiki/Hyprland#Display_Manager_Support
-    # make sure you're on
     wayland.windowManager.hyprland = {
-        # USWM and xserver settings are in ../modules/programs.nix
-
+        # UWSM and xserver settings are in ../../modules/programs.nix
         enable = true;
         xwayland.enable = true;
         systemd.enable = false; # handled by uwsm

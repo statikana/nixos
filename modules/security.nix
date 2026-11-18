@@ -2,7 +2,7 @@
     security = {
         sudo.extraRules = [
             {
-                users = [ "ryan" ];
+                groups = [ "fan_ctl" ];
                 commands = [
                     {
                         command = "/run/current-system/sw/bin/systemctl start thinkfan.service";
@@ -10,6 +10,22 @@
                     }
                     {
                         command = "/run/current-system/sw/bin/systemctl stop thinkfan.service";
+                        options = [ "NOPASSWD" ];
+                    }
+                    {
+                        command = "/run/current-system/sw/bin/systemctl restart thinkfan.service";
+                        options = [ "NOPASSWD" ];
+                    }
+                    {
+                        command = "/run/current-system/sw/bin/systemctl start thinkfan-auto.service";
+                        options = [ "NOPASSWD" ];
+                    }
+                    {
+                        command = "/run/current-system/sw/bin/systemctl start thinkfan-quiet.service";
+                        options = [ "NOPASSWD" ];
+                    }
+                    {
+                        command = "/run/current-system/sw/bin/systemctl start thinkfan-max.service";
                         options = [ "NOPASSWD" ];
                     }
                 ];

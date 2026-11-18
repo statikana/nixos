@@ -6,8 +6,8 @@
             wallpaper = [
                 {
                     fit_mode = "cover";
-                    monitor = "eDP-1";
-                    path = "/share/wallpapers/buttons.png";
+                    monitor = "";
+                    path = "/home/ryan/Downloads/glassy_bands.png";
                 }
             ];
         };

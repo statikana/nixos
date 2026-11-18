@@ -159,9 +159,9 @@
             "critical": 15
         },
         "events": {
-            "on-discharging-warning": "hyprctl notify 0 4000 0 'Charge your damn computer'",
-            "on-discharging-critical": "hyprctl notify 1 10000 1 'PLUG ME IN BEFORE YOU KILL ME'",
-            "on-charging-100": "hyprctl notify 0 2000 0 'ur good fam'"
+            "on-discharging-warning": "hyprctl notify 0 4000 'rgb(f9e2af)' 'Charge your damn computer'",
+            "on-discharging-critical": "hyprctl notify 1 10000 'rgb(f38ba8)' 'PLUG ME IN BEFORE YOU KILL ME'",
+            "on-charging-100": "hyprctl notify 0 2000 'rgb(a6e3a1)' 'ur good fam'"
         },
         "format": "{icon} {capacity}%",
         "format-charging": "󰂄 {capacity}%",

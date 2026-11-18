@@ -5,11 +5,10 @@
 #   - direct: Encrypted Cloudflare DoH via dnscrypt-proxy (127.0.0.1:53), direct IP
 #   - warp:   Cloudflare WARP WireGuard tunnel (warp0 -> Cloudflare IP) +
 #             Cloudflare DoH via dnscrypt-proxy (127.0.0.1:53)
-#   - tor:    Full Tor Transparent TCP Proxy (TransPort 9040 -> exit node IP) +
-#             Cloudflare DoH routed over Tor SOCKS5 (127.0.0.1:9050)
+#   - tor:    Full Tor Transparent TCP Proxy (TransPort 9040 -> exit node IP),
+#             .onion resolution via Tor DNSPort (9053), and Cloudflare DoH via Tor
 
 export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
-rm -f /tmp/dns-debug.log /tmp/dns-debug2.log /tmp/dns-debug3.log /tmp/test-dnscrypt.toml 2>/dev/null
 
 # Detect live service & interface status
 tor_active=0

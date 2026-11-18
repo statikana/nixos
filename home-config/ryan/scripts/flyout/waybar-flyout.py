@@ -3,7 +3,7 @@
 Windows-11-inspired GTK4 Layer-Shell Flyout Center for Waybar.
 Provides 3 crisp, sharp-cornered tabs:
   - hwmon : Live CPU, RAM/Swap, Package/NVMe/dGPU thermals, ThinkFan mode switch, Top Procs
-  - quick : Wi-Fi, Bluetooth, Mic, Keep-Awake tiles, Volume & Brightness sliders, DNS/WARP/Tor, Media
+  - quick : Wi-Fi, Bluetooth, Mic, Keep-Awake tiles, Volume & Brightness sliders, Screen Cast / Thunderbolt, DNS/WARP/Tor, Media
   - power : Battery hero status, Power Profile switch, BAT/AC hardware optimizations summary
 
 Runs as a lightweight warm daemon (0% CPU when hidden, <5ms popup on click)
@@ -11,6 +11,7 @@ controlled via $XDG_RUNTIME_DIR/waybar-flyout.sock.
 """
 
 import glob
+import json
 import os
 import re
 import socket
@@ -273,6 +274,21 @@ button.icon-btn.muted {
     color: #6c7086;
 }
 
+button.mini-icon-btn {
+    background-color: #161622;
+    border: 1px solid #26283a;
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 13px;
+    color: #9399b2;
+    box-shadow: none;
+}
+
+button.mini-icon-btn:hover {
+    border: 1px solid #89b4fa;
+    color: #89b4fa;
+}
+
 button.action-btn {
     background-color: #11111b;
     border: 1px solid #282a3d;
@@ -455,7 +471,7 @@ class TelemetryReader:
         fan_rpm = int(m_rpm.group(1)) if m_rpm else 0
         m_lvl = re.search(r"level:\s*(\S+)", fan_txt)
         fan_lvl = m_lvl.group(1) if m_lvl else "?"
-        fan_mode = read_file(os.path.join(RUNTIME_DIR, "fan-mode"), "auto") or "auto"
+        fan_mode = read_file("/run/fan-mode", "") or read_file(os.path.join(RUNTIME_DIR, "fan-mode"), "auto") or "auto"
 
         dgpu = read_file("/sys/bus/pci/devices/0000:01:00.0/power_state", "?")
 
@@ -518,7 +534,7 @@ class TelemetryReader:
                 hrs = (en_full - en_now) / power_uw
                 eta_str = f"{int(hrs)}h {int((hrs % 1) * 60):02d}m to full"
 
-        mode = read_file(os.path.join(RUNTIME_DIR, "power-mode"), "balanced") or "balanced"
+        mode = read_file("/run/power-mode", "") or read_file(os.path.join(RUNTIME_DIR, "power-mode"), "balanced") or "balanced"
         acpi_prof = read_file("/sys/firmware/acpi/platform_profile", "unknown")
         no_turbo = read_int("/sys/devices/system/cpu/intel_pstate/no_turbo", 0)
         epp = read_file("/sys/devices/system/cpu/cpu0/cpufreq/energy_performance_preference", "?")
@@ -634,10 +650,45 @@ class TelemetryReader:
             )
             media_title = meta.strip(" —")[:42] or "Media Active"
 
+        dgpu = read_file("/sys/bus/pci/devices/0000:01:00.0/power_state", "?")
+        mon_out, rc_m = run_out(["hyprctl", "monitors", "all", "-j"], timeout=0.6)
+        mons = []
+        if rc_m == 0 and mon_out:
+            try:
+                mons = json.loads(mon_out)
+            except Exception:
+                mons = []
+
+        internal_mon = next((m for m in mons if str(m.get("name", "")).startswith("eDP")), None)
+        ext_mons = [m for m in mons if not str(m.get("name", "")).startswith("eDP")]
+        active_ext = [m for m in ext_mons if not m.get("disabled", False)]
+        int_enabled = True if internal_mon is None else not internal_mon.get("disabled", False)
+
+        if not ext_mons:
+            cast_mode = "laptop"
+            cast_detail = "No display · dGPU asleep" if dgpu == "D3cold" else f"No display · dGPU {dgpu}"
+        elif not active_ext:
+            cast_mode = "laptop"
+            cast_detail = f"{ext_mons[0].get('name', 'Ext')} standby"
+        else:
+            ext0 = active_ext[0]
+            ext_name = ext0.get("name", "Ext")
+            ext_res = f"{ext0.get('width', 0)}x{ext0.get('height', 0)}"
+            target_lbl = f"{ext_name} ({ext_res})" if len(active_ext) == 1 else f"{len(active_ext)} displays"
+            if not int_enabled:
+                cast_mode = "external"
+                cast_detail = f"Docked → {target_lbl}"
+            elif any(m.get("mirrorOf") not in (None, "", "none") for m in active_ext):
+                cast_mode = "mirror"
+                cast_detail = f"Mirroring → {target_lbl}"
+            else:
+                cast_mode = "extend"
+                cast_detail = f"Extended → {target_lbl}"
+
         return {
             "vol_pct": max(0, min(100, vol_pct)),
             "vol_muted": vol_muted,
-            "mic_pct": mic_pct,
+            "mic_pct": max(0, min(100, mic_pct)),
             "mic_muted": mic_muted,
             "bri_pct": max(5, min(100, bri_pct)),
             "wifi_on": not wifi_blocked,
@@ -645,6 +696,8 @@ class TelemetryReader:
             "bt_on": bt_on,
             "bt_sub": bt_sub,
             "awake_on": awake_on,
+            "cast_mode": cast_mode,
+            "cast_detail": cast_detail,
             "dns_mode": dns_mode,
             "dns_detail": dns_detail,
             "media_active": media_active,
@@ -661,12 +714,16 @@ class FlyoutWindow(Gtk.Window):
         self.active_tab = initial_tab if initial_tab in ("hwmon", "quick", "power") else "quick"
         self.alive = True
         self.last_vol_drag = 0.0
+        self.last_mic_drag = 0.0
         self.last_bri_drag = 0.0
         self._vol_timer = None
+        self._mic_timer = None
         self._bri_timer = None
         self._pending_vol = None
+        self._pending_mic = None
         self._pending_bri = None
         self._updating_sliders = False
+        self._cast_busy = False
 
         self.add_css_class("flyout-backdrop")
         Gtk4LayerShell.init_for_window(self)
@@ -1049,6 +1106,23 @@ class FlyoutWindow(Gtk.Window):
         vol_row.append(btn_mixer)
         sliders_box.append(vol_row)
 
+        # Microphone Input Sensitivity Slider Row
+        mic_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        self.btn_mic_mute = Gtk.Button(label="󰍬")
+        self.btn_mic_mute.add_css_class("icon-btn")
+        self.btn_mic_mute.set_tooltip_text("Toggle Microphone Mute")
+        self.btn_mic_mute.connect("clicked", lambda *_: self._toggle_mic())
+        self.scale_mic = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 0, 100, 1)
+        self.scale_mic.set_draw_value(False)
+        self.scale_mic.set_hexpand(True)
+        self.scale_mic.connect("value-changed", self._on_mic_slider)
+        self.lbl_mic = Gtk.Label(label="100%", width_chars=5, xalign=1)
+        self.lbl_mic.add_css_class("sub-label")
+        mic_row.append(self.btn_mic_mute)
+        mic_row.append(self.scale_mic)
+        mic_row.append(self.lbl_mic)
+        sliders_box.append(mic_row)
+
         # Brightness Slider Row
         bri_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         bri_lbl_icon = Gtk.Button(label="󰃠")
@@ -1065,6 +1139,44 @@ class FlyoutWindow(Gtk.Window):
         bri_row.append(self.lbl_bri)
         sliders_box.append(bri_row)
         root.append(sliders_box)
+
+        # Screen Cast / Thunderbolt Projection Segmented Control
+        cast_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+        cast_box.add_css_class("section-box")
+        rc = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        tc = Gtk.Label(label="󰍹  Screen Cast", xalign=0)
+        tc.add_css_class("section-title")
+        tc.set_hexpand(True)
+        self.lbl_cast_sub = Gtk.Label(label="No display · dGPU asleep", xalign=1)
+        self.lbl_cast_sub.add_css_class("dim-label")
+        self.lbl_cast_sub.set_ellipsize(Pango.EllipsizeMode.END)
+        btn_detect = Gtk.Button(label="󰑐")
+        btn_detect.add_css_class("mini-icon-btn")
+        btn_detect.set_tooltip_text("Wake RTX A2000 & scan Thunderbolt ports")
+        btn_detect.connect("clicked", lambda *_: self._detect_cast_displays())
+        rc.append(tc)
+        rc.append(self.lbl_cast_sub)
+        rc.append(btn_detect)
+        cast_box.append(rc)
+
+        seg_cast = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=3)
+        seg_cast.add_css_class("seg-bar")
+        seg_cast.set_homogeneous(True)
+        self.cast_btns = {}
+        for mode, label, tip in [
+            ("laptop", "󰌢 Laptop", "Laptop panel only (disable external displays & let dGPU sleep)"),
+            ("mirror", "󰍺 Mirror", "Cast / duplicate laptop screen to Thunderbolt display"),
+            ("extend", "󰍹 Extend", "Extend desktop across laptop and Thunderbolt display"),
+            ("external", "󰶐 Docked", "Thunderbolt display only (turn off laptop panel)"),
+        ]:
+            b = Gtk.Button(label=label)
+            b.add_css_class("seg-btn")
+            b.set_tooltip_text(tip)
+            b.connect("clicked", lambda _, m=mode: self._set_cast_mode(m))
+            seg_cast.append(b)
+            self.cast_btns[mode] = b
+        cast_box.append(seg_cast)
+        root.append(cast_box)
 
         # DNS / Privacy Route Segmented Control
         dns_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
@@ -1187,10 +1299,28 @@ class FlyoutWindow(Gtk.Window):
             self.btn_mute.set_label("󰕾")
             self.btn_mute.remove_css_class("muted")
 
+        if now - self.last_mic_drag > 0.7:
+            self.scale_mic.set_value(s["mic_pct"])
+            self.lbl_mic.set_text("Mute" if s["mic_muted"] else f"{s['mic_pct']}%")
+        if s["mic_muted"]:
+            self.btn_mic_mute.set_label("󰍭")
+            self.btn_mic_mute.add_css_class("muted")
+        else:
+            self.btn_mic_mute.set_label("󰍬")
+            self.btn_mic_mute.remove_css_class("muted")
+
         if now - self.last_bri_drag > 0.7:
             self.scale_bri.set_value(s["bri_pct"])
             self.lbl_bri.set_text(f"{s['bri_pct']}%")
         self._updating_sliders = False
+
+        if not self._cast_busy:
+            self.lbl_cast_sub.set_text(s["cast_detail"])
+            for m, btn in self.cast_btns.items():
+                if m == s["cast_mode"]:
+                    btn.add_css_class("active")
+                else:
+                    btn.remove_css_class("active")
 
         self.lbl_dns_sub.set_text(s["dns_detail"])
         for m, btn in self.dns_btns.items():
@@ -1221,6 +1351,28 @@ class FlyoutWindow(Gtk.Window):
         if val is not None:
             threading.Thread(
                 target=lambda: run_out(["wpctl", "set-volume", "@DEFAULT_AUDIO_SINK@", f"{val}%"], 0.5),
+                daemon=True,
+            ).start()
+        return False
+
+    def _on_mic_slider(self, scale):
+        if self._updating_sliders:
+            return
+        val = int(round(scale.get_value()))
+        self.last_mic_drag = time.monotonic()
+        self.lbl_mic.set_text(f"{val}%")
+        if self.tile_mic["wrap"].has_css_class("active"):
+            self.tile_mic["sub"].set_text(f"Ready ({val}%)")
+        self._pending_mic = val
+        if self._mic_timer is None:
+            self._mic_timer = GLib.timeout_add(35, self._flush_mic)
+
+    def _flush_mic(self):
+        self._mic_timer = None
+        val = self._pending_mic
+        if val is not None:
+            threading.Thread(
+                target=lambda: run_out(["wpctl", "set-volume", "@DEFAULT_AUDIO_SOURCE@", f"{val}%"], 0.5),
                 daemon=True,
             ).start()
         return False
@@ -1297,6 +1449,41 @@ class FlyoutWindow(Gtk.Window):
 
         threading.Thread(target=worker, daemon=True).start()
 
+    def _set_cast_mode(self, mode: str):
+        if self._cast_busy:
+            return
+        self._cast_busy = True
+        for m, btn in self.cast_btns.items():
+            if m == mode:
+                btn.add_css_class("active")
+            else:
+                btn.remove_css_class("active")
+        self.lbl_cast_sub.set_text("Applying..." if mode == "laptop" else "Scanning Thunderbolt...")
+
+        def worker():
+            try:
+                run_out(["bash", f"{SCRIPTS_DIR}/display/display-cast.sh", mode], timeout=6.0)
+            finally:
+                self._cast_busy = False
+                self._bg_quick()
+
+        threading.Thread(target=worker, daemon=True).start()
+
+    def _detect_cast_displays(self):
+        if self._cast_busy:
+            return
+        self._cast_busy = True
+        self.lbl_cast_sub.set_text("Waking dGPU & scanning...")
+
+        def worker():
+            try:
+                run_out(["bash", f"{SCRIPTS_DIR}/display/display-cast.sh", "detect"], timeout=6.0)
+            finally:
+                self._cast_busy = False
+                self._bg_quick()
+
+        threading.Thread(target=worker, daemon=True).start()
+
     def _set_dns_mode(self, mode: str):
         for m, btn in self.dns_btns.items():
             if m == mode:
@@ -1360,8 +1547,8 @@ class FlyoutWindow(Gtk.Window):
         seg_pwr.set_homogeneous(True)
         self.pwr_btns = {}
         for mode, label in [
-            ("saver", "󰾅  Saver"),
-            ("balanced", "󰾆  Balanced"),
+            ("saver", "󰾆  Saver"),
+            ("balanced", "󰾅  Balanced"),
             ("performance", "󰓅  Perf"),
         ]:
             b = Gtk.Button(label=label)

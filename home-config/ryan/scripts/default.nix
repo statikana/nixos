@@ -1,5 +1,5 @@
 { lib, ... }: {
     home.activation.makeWaybarScriptsExecutable = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-        chmod -R +x /home/ryan/nixos/home-config/ryan/scripts
+        find /home/ryan/nixos/home-config/ryan/scripts -type f \( -name "*.sh" -o -name "*.py" \) -exec chmod +x {} +
     '';
 }

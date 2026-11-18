@@ -84,7 +84,8 @@ while true; do
 
     pl1_w=$(($(cat /sys/class/powercap/intel-rapl:0/constraint_0_power_limit_uw 2>/dev/null || echo 0) / 1000000))
     pl2_w=$(($(cat /sys/class/powercap/intel-rapl:0/constraint_1_power_limit_uw 2>/dev/null || echo 0) / 1000000))
-    fan_mode=$(cat "$XDG_RUNTIME_DIR/fan-mode" 2>/dev/null || echo auto)
+    fan_mode=$(cat /run/fan-mode "$XDG_RUNTIME_DIR/fan-mode" 2>/dev/null | head -n 1)
+    [ -z "$fan_mode" ] && fan_mode="auto"
     fan_rpm=$(grep -oP 'speed:\s*\K[0-9]+' /proc/acpi/ibm/fan 2>/dev/null || echo 0)
     dgpu_state=$(cat /sys/bus/pci/devices/0000:01:00.0/power_state 2>/dev/null || echo "?")
 

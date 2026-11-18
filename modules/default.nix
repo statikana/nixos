@@ -7,10 +7,8 @@
             name: type:
             !(lib.hasPrefix "_" name)
             && (name != "default.nix")
-            && (type == "directory" || lib.hasSuffix ".nix" name) # read all directories and .nix files here
+            && (type == "directory" || lib.hasSuffix ".nix" name)
         ))
-        (lib.mapAttrsToList (
-            name: _: ./. + (builtins.trace "module: ${name}" "/${name}") # relative pathing
-        ))
+        (lib.mapAttrsToList (name: _: ./. + "/${name}"))
     ];
 }

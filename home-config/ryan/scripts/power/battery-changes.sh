@@ -18,8 +18,10 @@ collect_state() {
     power_uw=$(cat /sys/class/power_supply/BAT0/power_now 2>/dev/null || echo 0)
     power_w=$(awk "BEGIN { printf \"%.1f\", $power_uw / 1000000 }" 2>/dev/null || echo "0.0")
 
-    mode=$(cat "$XDG_RUNTIME_DIR/power-mode" 2>/dev/null || echo balanced)
-    fan_mode=$(cat "$XDG_RUNTIME_DIR/fan-mode" 2>/dev/null || echo auto)
+    mode=$(cat /run/power-mode "$XDG_RUNTIME_DIR/power-mode" 2>/dev/null | head -n 1)
+    [ -z "$mode" ] && mode="balanced"
+    fan_mode=$(cat /run/fan-mode "$XDG_RUNTIME_DIR/fan-mode" 2>/dev/null | head -n 1)
+    [ -z "$fan_mode" ] && fan_mode="auto"
     profile=$(cat /sys/firmware/acpi/platform_profile 2>/dev/null || echo unknown)
     epp=$(cat /sys/devices/system/cpu/cpu0/cpufreq/energy_performance_preference 2>/dev/null || echo unknown)
     no_turbo=$(cat /sys/devices/system/cpu/intel_pstate/no_turbo 2>/dev/null || echo 0)
@@ -31,7 +33,13 @@ collect_state() {
     pl1_w=$((pl1_uw / 1000000))
     pl2_w=$((pl2_uw / 1000000))
 
-    igpu_max=$(cat /sys/class/drm/card1/gt/gt0/rps_max_freq_mhz 2>/dev/null || echo "1400")
+    igpu_max=$(cat /sys/bus/pci/devices/0000:00:02.0/drm/card*/gt/gt0/rps_max_freq_mhz 2>/dev/null | head -n 1)
+    [ -z "$igpu_max" ] && igpu_max="1400"
+    if [ "$mode" = "saver" ] || { [ "$mode" = "balanced" ] && [ "$ac" = "0" ]; }; then
+        prochot_side="bat"
+    else
+        prochot_side="ac"
+    fi
     dgpu_state=$(cat /sys/bus/pci/devices/0000:01:00.0/power_state 2>/dev/null || echo "?")
     fan_rpm=$(grep -oP 'speed:\s*\K[0-9]+' /proc/acpi/ibm/fan 2>/dev/null || echo "0")
     cpu_temp=$(awk '{max=$2; for(i=2;i<=NF;i++) if($i>max) max=$i; print max}' /proc/acpi/ibm/thermal 2>/dev/null || echo "?")
@@ -176,7 +184,7 @@ if [ "${1:-}" = "--interactive" ] || [ "${1:-}" = "--dump-once" ]; then
         printf "  ${TXT}%-28s${RST} %s${EL}\n" "Energy Perf Policy (EPP)" \
             "$(fmt_pair "$([ "$epp" = "power" ] && echo bat || echo ac)" "power" "$epp")"
         printf "  ${TXT}%-28s${RST} %s  ${SUB}(CPU: ${cpu_temp}°C)${RST}${EL}\n" "PROCHOT Thermal Target" \
-            "$(fmt_pair "$([ "$ac" = "0" ] && echo bat || echo ac)" "65°C Ceiling" "85°C Ceiling")"
+            "$(fmt_pair "$prochot_side" "65°C Ceiling" "85°C Ceiling")"
         printf "  ${TXT}%-28s${RST} %s  ${SUB}(mode: ${fan_mode})${RST}${EL}\n" "ThinkFan Acoustic Curve" \
             "$(fmt_pair "$([ "${fan_rpm:-0}" -eq 0 ] 2>/dev/null && echo bat || echo ac)" "0 RPM (<${fan_zero_up}°C)" "Active (${fan_rpm} RPM)")"
 
@@ -283,7 +291,7 @@ tt+="  RAPL Power (PL1/PL2):   $(pango_triple "$rapl_idx" "20/35W" "35/65W" "45/
 tt+="  CPU Turbo Boost:        $(pango_pair "$([ "$no_turbo" = "1" ] && echo bat || echo ac)" "Off" "On")\n"
 tt+="  HWP Dynamic Boost:      $(pango_pair "$([ "$hwp_boost" = "0" ] && echo bat || echo ac)" "Off" "On")\n"
 tt+="  Energy Perf (EPP):      $(pango_pair "$([ "$epp" = "power" ] && echo bat || echo ac)" "power" "$epp")\n"
-tt+="  PROCHOT Target:         $(pango_pair "$([ "$ac" = "0" ] && echo bat || echo ac)" "65°C" "85°C") <span foreground='#a6adc8'>(now ${cpu_temp}°C)</span>\n"
+tt+="  PROCHOT Target:         $(pango_pair "$prochot_side" "65°C" "85°C") <span foreground='#a6adc8'>(now ${cpu_temp}°C)</span>\n"
 tt+="  ThinkFan Curve:         $(pango_pair "$([ "${fan_rpm:-0}" -eq 0 ] 2>/dev/null && echo bat || echo ac)" "0 RPM &lt;${fan_zero_up}°C" "${fan_rpm} RPM")\n"
 tt+="\n<span foreground='#f9e2af' weight='bold'>── Graphics &amp; Media (Iris Xe + RTX A2000) ────</span>\n"
 tt+="  Iris Xe iGPU Clock:     $(pango_pair "$([ "${igpu_max:-1400}" -le 700 ] 2>/dev/null && echo bat || echo ac)" "600 MHz" "1400 MHz") <span foreground='#a6adc8'>+ FBC/GuC</span>\n"
