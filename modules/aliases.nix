@@ -6,6 +6,7 @@
         reb = "~/nixos/rebuild.sh";
         gc = "nix-collect-garbage --delete-older-than 14d && sudo nix-collect-garbage --delete-older-than 14d";
         pks = "code ~/nixos/modules/packages.nix";
+        l = "f(){find **/*$1*; unset -f f; } f";
 
         nfm = "nixfmt --indent=4 ~/nixos && echo \"Done\"";
 

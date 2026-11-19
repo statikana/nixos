@@ -10,6 +10,7 @@ echo "(moved into ${CFG_DIR})"
 echo "dont forget you can use reb-offline or \"rebuild.sh offline\" if you dont have internet to skip git push"
 
 # Register any untracked files so Nix flakes include them, but only commit/push AFTER rebuild succeeds
+nixfmt --indent=4 ~/nixos
 git add -N .
 sudo nixos-rebuild switch --flake "${CFG_DIR}#ryan-nixos"
 

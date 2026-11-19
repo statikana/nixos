@@ -194,16 +194,18 @@ let
     # Dedicated ThinkFan YAML curves so ThinkFan stays running in all 3 modes (`auto`, `quiet`, `max`),
     # preventing ThinkPad's 120s hardware EC fan watchdog from resetting manual overrides while
     # preserving an emergency thermal ceiling in `quiet` mode.
-    mkThinkfanYaml = name: levelsYaml: pkgs.writeText "thinkfan-${name}.yaml" ''
-        %YAML 1.1
-        ---
-        fans:
-        - tpacpi: /proc/acpi/ibm/fan
-        sensors:
-        - tpacpi: /proc/acpi/ibm/thermal
-        levels:
-        ${levelsYaml}
-    '';
+    mkThinkfanYaml =
+        name: levelsYaml:
+        pkgs.writeText "thinkfan-${name}.yaml" ''
+            %YAML 1.1
+            ---
+            fans:
+            - tpacpi: /proc/acpi/ibm/fan
+            sensors:
+            - tpacpi: /proc/acpi/ibm/thermal
+            levels:
+            ${levelsYaml}
+        '';
 
     thinkfanAutoYaml = mkThinkfanYaml "auto" ''
         - - 0
@@ -253,13 +255,15 @@ let
           - 255
     '';
 
-    mkThinkfanSwitch = mode: yamlFile: pkgs.writeShellScript "switch-thinkfan-${mode}" ''
-        set -e
-        ln -sfn "${yamlFile}" /run/thinkfan-active.yaml
-        printf "%s\n" "${mode}" > /run/fan-mode
-        chmod 0644 /run/fan-mode
-        /run/current-system/sw/bin/systemctl restart thinkfan.service
-    '';
+    mkThinkfanSwitch =
+        mode: yamlFile:
+        pkgs.writeShellScript "switch-thinkfan-${mode}" ''
+            set -e
+            ln -sfn "${yamlFile}" /run/thinkfan-active.yaml
+            printf "%s\n" "${mode}" > /run/fan-mode
+            chmod 0644 /run/fan-mode
+            /run/current-system/sw/bin/systemctl restart thinkfan.service
+        '';
 
     # Re-apply active undervolt power/thermal/turbo profile on wake from sleep
     restoreUndervoltProfile = pkgs.writeShellScript "restore-undervolt-profile" ''
