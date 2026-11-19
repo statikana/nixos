@@ -4,7 +4,7 @@ Windows-11-inspired GTK4 Layer-Shell Flyout Center for Waybar.
 Provides 3 crisp, sharp-cornered tabs:
   - hwmon : Live CPU, RAM/Swap, Package/NVMe/dGPU thermals, ThinkFan mode switch, Top Procs
   - quick : Wi-Fi, Bluetooth, Mic, Keep-Awake tiles, Volume & Brightness sliders, Screen Cast / Thunderbolt, DNS/WARP/Tor, Media
-  - power : Battery hero status, Power Profile switch, BAT/AC hardware optimizations summary
+  - power : Battery hero status, Power Profile switch, Lid Close behavior, BAT/AC hardware optimizations summary
 
 Runs as a lightweight warm daemon (0% CPU when hidden, <5ms popup on click)
 controlled via $XDG_RUNTIME_DIR/waybar-flyout.sock.
@@ -544,6 +544,8 @@ class TelemetryReader:
         m_aspm = re.search(r"\[([^\]]+)\]", aspm_raw)
         aspm = m_aspm.group(1) if m_aspm else (aspm_raw or "?")
         dgpu = read_file("/sys/bus/pci/devices/0000:01:00.0/power_state", "?")
+        lid_out, _ = run_out(["systemctl", "--user", "is-active", "waybar-lid-inhibit.service"], timeout=0.4)
+        lid_mode = "keep" if lid_out == "active" else "suspend"
 
         return {
             "ac": ac,
@@ -555,6 +557,7 @@ class TelemetryReader:
             "stop_thr": stop_thr,
             "eta_str": eta_str,
             "mode": mode,
+            "lid_mode": lid_mode,
             "acpi_prof": acpi_prof,
             "turbo": "Off" if no_turbo == 1 else "On",
             "epp": epp,
@@ -1559,6 +1562,36 @@ class FlyoutWindow(Gtk.Window):
         prof_box.append(seg_pwr)
         root.append(prof_box)
 
+        # Lid Close Behavior Segmented Box
+        lid_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+        lid_box.add_css_class("section-box")
+        rl = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+        tl = Gtk.Label(label="󰌢  Lid Close", xalign=0)
+        tl.add_css_class("section-title")
+        tl.set_hexpand(True)
+        self.lbl_lid_sub = Gtk.Label(label="Suspends on close", xalign=1)
+        self.lbl_lid_sub.add_css_class("dim-label")
+        rl.append(tl)
+        rl.append(self.lbl_lid_sub)
+        lid_box.append(rl)
+
+        seg_lid = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=3)
+        seg_lid.add_css_class("seg-bar")
+        seg_lid.set_homogeneous(True)
+        self.lid_btns = {}
+        for mode, label, tip in [
+            ("suspend", "󰤄  Suspend", "Normal behavior: suspend laptop when lid is closed"),
+            ("keep", "󰈈  Keep Running", "Keep laptop running when lid is closed (inhibits lid-switch & idle sleep)"),
+        ]:
+            b = Gtk.Button(label=label)
+            b.add_css_class("seg-btn")
+            b.set_tooltip_text(tip)
+            b.connect("clicked", lambda _, m=mode: self._set_lid_mode(m))
+            seg_lid.append(b)
+            self.lid_btns[mode] = b
+        lid_box.append(seg_lid)
+        root.append(lid_box)
+
         # Active Optimizations Grid (reusing battery-changes.sh sysfs parameters)
         opt_grid = Gtk.Grid(column_spacing=8, row_spacing=8)
         opt_grid.set_column_homogeneous(True)
@@ -1642,8 +1675,34 @@ class FlyoutWindow(Gtk.Window):
             else:
                 btn.remove_css_class("active")
 
+        lid_mode = d.get("lid_mode", "suspend")
+        self.lbl_lid_sub.set_text(
+            "Inhibited · Stays running" if lid_mode == "keep" else "Suspends on close"
+        )
+        for m, btn in self.lid_btns.items():
+            if m == lid_mode:
+                btn.add_css_class("active")
+            else:
+                btn.remove_css_class("active")
+
         for k, lbl in self.opt_cells.items():
             lbl.set_text(str(d.get(k, "--")))
+
+    def _set_lid_mode(self, mode: str):
+        for m, btn in self.lid_btns.items():
+            if m == mode:
+                btn.add_css_class("active")
+            else:
+                btn.remove_css_class("active")
+        self.lbl_lid_sub.set_text(
+            "Inhibited · Stays running" if mode == "keep" else "Suspends on close"
+        )
+
+        def worker():
+            run_out(["bash", f"{SCRIPTS_DIR}/power/lid-inhibit.sh", mode], timeout=3.0)
+            GLib.idle_add(self.refresh_active_tab)
+
+        threading.Thread(target=worker, daemon=True).start()
 
     def _set_power_mode(self, mode: str):
         for m, btn in self.pwr_btns.items():
