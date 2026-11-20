@@ -620,6 +620,12 @@ in
     environment.pathsToLink = [ "/share/icons" ];
 
     services = {
+        ollama = {
+            enable = true;
+            package = pkgs.ollama-cuda;
+            # acceleration = "cuda";  # depracated
+        };
+
         flatpak.enable = true;
 
         printing.enable = false; # CUPS
