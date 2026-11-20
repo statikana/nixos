@@ -109,6 +109,7 @@ in
                     dash
                     pydantic
                     fastapi
+                    beautifulsoup4
                 ]
             ))
 
