@@ -110,6 +110,9 @@ in
                     pydantic
                     fastapi
                     beautifulsoup4
+                    pypdf
+                    weasyprint
+
                 ]
             ))
 
