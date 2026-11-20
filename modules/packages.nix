@@ -102,6 +102,13 @@ in
                     kconfiglib
                     sympy
                     manim
+                    matplotlib
+                    flask
+                    pillow
+                    rich
+                    dash
+                    pydantic
+                    fastapi
                 ]
             ))
 
