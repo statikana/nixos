@@ -22,7 +22,6 @@
         cliphist
         peazip
         wiremix # TUI pipewire mixer, replaces pavucontrol on waybar left-click
-        nerd-fonts.jetbrains-mono
         bibata-cursors # Complete XCursor + Hyprcursor theme with all cursor poses
         adwaita-icon-theme # Standard GTK icon/cursor fallback
     ];

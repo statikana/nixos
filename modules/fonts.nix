@@ -5,6 +5,8 @@
 
         packages = with pkgs; [
             nerd-fonts.jetbrains-mono
+            ibm-plex
+            inter
 
             # LaTeX / LyX OpenType & TrueType fonts (screen display and XeTeX/LuaTeX non-TeX fonts)
             lmodern
@@ -18,7 +20,6 @@
             crimson-pro
             fira
             fira-mono
-            ibm-plex
             noto-fonts
             source-serif
             source-sans
