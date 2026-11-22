@@ -112,7 +112,7 @@ in
                     beautifulsoup4
                     pypdf
                     weasyprint
-
+                    playwright
                 ]
             ))
 
