@@ -205,6 +205,7 @@ in
             glib # gnome lib tools
             lufus # rufus for linux
             ventoy # flash iso
+            playwright
         ]
         ++ commonsPkgs;
 
