@@ -631,9 +631,9 @@ in
         printing.enable = false; # CUPS
 
         avahi = {
-            enable = false;
-            # nssmdns4 = true;
-            # openFirewall = true;
+            enable = true;
+            nssmdns4 = true;
+            openFirewall = true;
         };
 
         libinput.enable = true; # touchpad
