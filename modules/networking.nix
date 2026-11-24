@@ -17,12 +17,12 @@
 
     # 7236, 7250: miracast
     networking.firewall.allowedTCPPorts = [
-        7236
-        7250
+        # 7236
+        # 7250
     ];
     networking.firewall.allowedUDPPorts = [
-        7236
-        7250
+        # 7236
+        # 7250
     ];
     # networking.firewall.enable = false;
 

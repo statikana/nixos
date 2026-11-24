@@ -206,7 +206,8 @@ in
             lufus # rufus for linux
             ventoy # flash iso
             playwright
-            miraclecast
+            # miraclecast
+            gnome-network-displays
         ]
         ++ commonsPkgs;
 
