@@ -15,7 +15,15 @@
     # so strict reverse-path filtering doesn't drop incoming WireGuard packets
     networking.firewall.checkReversePath = "loose";
 
-    # networking.firewall.allowedUDPPorts = [ ... ];
+    # 7236, 7250: miracast
+    networking.firewall.allowedTCPPorts = [
+        7236
+        7250
+    ];
+    networking.firewall.allowedUDPPorts = [
+        7236
+        7250
+    ];
     # networking.firewall.enable = false;
 
     # NetworkManager-wait-online blocks boot for ~4-5s waiting for network-online.target;
