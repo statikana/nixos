@@ -7,4 +7,6 @@
 
     # i actually just did a symlink instead. maybe not the brightest idea
     # but it makes it update live
+
+    # xdg.portal.enable = true;
 }

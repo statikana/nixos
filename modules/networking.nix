@@ -9,6 +9,7 @@
     # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
 
     networking.networkmanager.enable = true;
+    networking.networkmanager.wifi.backend = "wpa_supplicant";
     # networking.nameservers = ["127.0.0.1"];
 
     # Required for wg-quick policy routing (Cloudflare WARP tunnel on warp0)
@@ -25,6 +26,7 @@
         # 7250
     ];
     # networking.firewall.enable = false;
+    networking.firewall.trustedInterfaces = [ "p2p-+" ];
 
     # NetworkManager-wait-online blocks boot for ~4-5s waiting for network-online.target;
     # nothing on this machine actually needs that guarantee at boot.
