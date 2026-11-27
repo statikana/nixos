@@ -208,6 +208,7 @@ in
             playwright
             # miraclecast
             gnome-network-displays
+            qdirstat
         ]
         ++ commonsPkgs;
 
